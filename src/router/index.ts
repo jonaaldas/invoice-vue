@@ -1,14 +1,9 @@
-import { createMemoryHistory, createRouter } from "vue-router";
+import { createRouter, createWebHistory } from "vue-router";
+import { routes } from "vue-router/auto-routes";
 
 const router = createRouter({
-  history: createMemoryHistory(),
-  routes: [
-    {
-      path: "/home",
-      name: "Home",
-      component: () => import("../App.vue"),
-    },
-  ],
+  history: createWebHistory(),
+  routes,
 });
 
 export default router;
