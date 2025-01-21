@@ -1,18 +1,18 @@
 <script setup lang="ts">
-import Navbar from "../components/Navbar.vue";
-import Hero from "../components/Hero.vue";
-import Benefits from "../components/Benefits.vue";
-import Features from "../components/Features.vue";
-import Services from "../components/Services.vue";
-import HowItWorks from "../components/HowItWorks.vue";
-import Sponsors from "../components/Sponsors.vue";
-import Testimonials from "../components/Testimonials.vue";
-import Team from "../components/Team.vue";
-import Pricing from "../components/Pricing.vue";
-import Community from "../components/Community.vue";
-import Contact from "../components/Contact.vue";
-import FAQ from "../components/FAQ.vue";
-import Footer from "../components/Footer.vue";
+import Navbar from "../components/landing_page/Navbar.vue";
+import Hero from "../components/landing_page/Hero.vue";
+import Benefits from "../components/landing_page/Benefits.vue";
+import Features from "../components/landing_page/Features.vue";
+import Services from "../components/landing_page/Services.vue";
+import HowItWorks from "../components/landing_page/HowItWorks.vue";
+import Sponsors from "../components/landing_page/Sponsors.vue";
+import Testimonials from "../components/landing_page/Testimonials.vue";
+import Team from "../components/landing_page/Team.vue";
+import Pricing from "../components/landing_page/Pricing.vue";
+import Community from "../components/landing_page/Community.vue";
+import Contact from "../components/landing_page/Contact.vue";
+import FAQ from "../components/landing_page/FAQ.vue";
+import Footer from "../components/landing_page/Footer.vue";
 </script>
 
 <template>
