@@ -38,7 +38,7 @@
       </StepperItem>
     </Stepper>
     <template v-if="stepIndex === 1">
-        <CreateInvoice @form-data="handleFormPopulate" />
+      <CreateInvoice @form-data="handleFormPopulate" />
     </template>
     <template v-if="stepIndex === 2">
       <InvoicePreview @schedule-email="handleEmailSchedule" />
@@ -47,7 +47,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref, provide, computed } from "vue";
 import {
   Stepper,
   StepperItem,
@@ -96,12 +95,12 @@ function handleFormPopulate(formValues: any) {
 
 function handleEmailSchedule(scheduleData: any) {
   emailSchedule.value = scheduleData;
-  console.log('Email scheduled:', scheduleData);
+  console.log("Email scheduled:", scheduleData);
   // TODO: Implement actual email scheduling logic
 }
 
-provide('goToNextStep', goToNextStep);
-provide('invoiceForm', form);
+provide("goToNextStep", goToNextStep);
+provide("invoiceForm", form);
 </script>
 
 <style scoped></style>
