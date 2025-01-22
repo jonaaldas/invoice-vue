@@ -1,7 +1,4 @@
 <template>
-      <pre>
-    {{ form }}
-  </pre>
   <div class="container mx-auto max-w-screen-lg flex flex-col gap-4">
     <Stepper class="flex w-full items-start gap-2" v-model="stepIndex">
       <StepperItem

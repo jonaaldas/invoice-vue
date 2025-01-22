@@ -95,6 +95,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ChevronDownIcon, DownloadIcon, MailIcon } from 'lucide-vue-next';
 import EmailScheduleForm from './email_schedule_form.vue';
+import EmailWriter from './email_writer.vue';
 
 const emit = defineEmits(['schedule-email']);
 const form = inject('invoiceForm');
