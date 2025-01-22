@@ -43,6 +43,7 @@
     "embla-carousel": "^8.3.0",
     "embla-carousel-vue": "^8.3.0",
     "html-to-pdf": "^0.1.11",
+    "html2pdf": "^0.0.11",
     "html2pdf.js": "^0.10.2",
     "postgres": "^3.4.5",
     "radix-vue": "^1.9.7",

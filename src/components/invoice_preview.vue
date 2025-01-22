@@ -23,8 +23,8 @@
           </DropdownMenuContent>
         </DropdownMenu>
       </CardHeader>
-      <CardContent>
-        <div class="grid grid-cols-12 gap-6">
+      <CardContent id="invoice-preview-download">
+        <div class="grid grid-cols-12 gap-6" >
           <!-- Invoice Details -->
           <div class="col-span-12 flex justify-between">
             <div>
@@ -95,7 +95,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ChevronDownIcon, DownloadIcon, MailIcon } from 'lucide-vue-next';
 import EmailScheduleForm from './email_schedule_form.vue';
-import EmailWriter from './email_writer.vue';
+import html2pdf from "html2pdf.js";
 
 const emit = defineEmits(['schedule-email']);
 const form = inject('invoiceForm');
@@ -108,10 +108,6 @@ function formatCurrency(value: number): string {
   }).format(value);
 }
 
-function handleDownload() {
-  // TODO: Implement PDF download functionality
-  console.log('Download PDF');
-}
 
 function handleEmail() {
   showEmailForm.value = !showEmailForm.value;
@@ -121,6 +117,19 @@ function handleScheduleEmail(scheduleData: any) {
   emit('schedule-email', scheduleData);
   showEmailForm.value = false;
 }
+
+const handleDownload = async () => {
+  var element = document.getElementById("invoice-preview-download");
+  var opt = {
+    margin: 10,
+    filename: `Invoice`,
+    image: { type: "jpeg", quality: 1 },
+    html2canvas: { scale: 3, useCORS: true, scrollY: 0 },
+    jsPDF: { unit: "pt", format: "letter", orientation: "portrait", compressPDF: true },
+  };
+  html2pdf().from(element).set(opt).toPdf().get("pdf").save();
+  // redirect to all invoices
+};
 </script>
 
 <style scoped>

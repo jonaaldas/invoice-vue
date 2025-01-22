@@ -6,10 +6,8 @@
     </CardHeader>
     <CardContent>
       <!-- <ClientSelection class="col-span-12 sm:col-span-6" /> -->
-
       <form @submit="onSubmit" class="grid grid-cols-12 gap-4">
         <FormField v-slot="{ componentField }" name="invoiceNumber">
-          {{ componentField }}
           <FormItem class="col-span-12 sm:col-start-8 sm:col-end-13">
             <FormLabel>Invoice Number</FormLabel>
             <FormControl>

@@ -90,6 +90,7 @@
                 </div>
                 <EditorContent :editor="editor" class="prose max-w-none h-[200px] p-4" :id="formItemId" />
               </div>
+              <FormMessage />
             </div>
           </FormField>
 
@@ -214,12 +215,23 @@ const form = useForm({
 });
 
 const onSubmit = form.handleSubmit((values) => {
-  const formData = {
-    ...values,
-    content: editor.value?.getHTML() || '',
-    isScheduled: sendNow.value === 'false'
-  };
   
+    const formData = {
+      ...values,
+      content: editor.value?.getHTML() || '',
+      isScheduled: sendNow.value === 'false'
+    };
+  if(sendNow.value === 'true'){
+    if(!confirm('Are you sure you want to schedule this email?')){
+      return 
+    }
+    window.toaster('Success', 'Email scheduled successfully')
+  } else {
+    if(!confirm('Are you sure you want to schedule this email?')){
+      return
+    }
+    window.toaster('Success', 'Email scheduled successfully')
+  }
   emit('schedule-email', formData);
 });
 
