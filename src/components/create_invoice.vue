@@ -6,7 +6,7 @@
     </CardHeader>
     <CardContent>
       <!-- <ClientSelection class="col-span-12 sm:col-span-6" /> -->
-      <form @submit="onSubmit" class="grid grid-cols-12 gap-4">
+      <form id="invoiceForm" @submit.prevent="onSubmit" class="grid grid-cols-12 gap-4">
         <FormField v-slot="{ componentField }" name="invoiceNumber">
           <FormItem class="col-span-12 sm:col-start-8 sm:col-end-13">
             <FormLabel>Invoice Number</FormLabel>
@@ -104,34 +104,30 @@
             <span class="font-medium">Tax</span>
             <span class="ml-auto">{{ formatCurrency(calculateTax) }}</span>
           </div>
-          
+
           <div class="w-full flex flex-row items-center mt-2">
             <span class="font-medium">Total</span>
             <span class="ml-auto text-lg font-bold">{{ formatCurrency(calculateTotal) }}</span>
           </div>
         </div>
-
-        <div class="flex justify-end w-full">
-          <Button type="submit">Next</Button>
-        </div>
       </form>
     </CardContent>
   </Card>
+
+  <div class="flex justify-end w-full">
+    <Button type="submit" form="invoiceForm">Next</Button>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, inject, defineEmits } from "vue";
-// import { format } from "date-fns";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "../components/ui/card";
 import { Input } from "../components/ui/input";
-// import { Label } from "../components/ui/label";
 import { Button } from "../components/ui/button";
 import ClientSelection from "./client_selection.vue";
 // import { Popover, PopoverContent, PopoverTrigger } from "../components/ui/popover";
 // import { Calendar } from "../components/ui/calendar";
 import { PlusIcon, TrashIcon } from "lucide-vue-next";
 import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "../components/ui/form";
-import { Client } from "../db/schema";
 import { toTypedSchema } from "@vee-validate/zod";
 import * as z from "zod";
 import { useForm } from "vee-validate";
@@ -177,19 +173,17 @@ const formSchema = toTypedSchema(
   })
 );
 
-
 const totalSchema = z.object({
   subtotal: z.number().min(0.1, "Subtotal is required"),
   tax: z.number().min(0, "Tax is required"),
   total: z.number().min(0.1, "Total is required"),
-})
+});
 
 const form = useForm({
   validationSchema: formSchema,
 });
 
 form.setFieldValue("lineItems", [{ description: "", quantity: 1, price: 0 }]);
-
 
 const addLineItem = () => {
   const currentItems = form.values.lineItems || [];
@@ -246,19 +240,19 @@ const onSubmit = form.handleSubmit((values) => {
   });
 
   if (!totalValidation.success) {
-    console.error('Total validation failed:', totalValidation.error);
+    console.error("Total validation failed:", totalValidation.error);
     return;
   }
-  
-  emit('form-data', {
+
+  emit("form-data", {
     ...values,
     subtotal: calculateSubtotal.value,
     tax: calculateTax.value,
-    total: calculateTotal.value
-  })
+    total: calculateTotal.value,
+  });
 });
 
-const goToNextStep = inject('goToNextStep') as () => void;
+const goToNextStep = inject("goToNextStep") as () => void;
 </script>
 
 <style scoped></style>

@@ -35,7 +35,7 @@ const onSubmit = form.handleSubmit(async (values) => {
   }
 
   window.toaster("Success", "Login successful");
-  // router.push("/");
+  router.push("/");
 });
 </script>
 
