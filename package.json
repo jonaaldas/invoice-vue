@@ -27,7 +27,8 @@
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "supabase:migration": "supabase migration new invoice_schema",
-    "supabase:db:reset": "supabase db reset --linked"
+    "supabase:db:reset": "supabase db reset --linked",
+    "supabase:db:types": "npx supabase gen types typescript --linked > database.types.ts"
   },
   "dependencies": {
     "@selemondev/vue3-marquee": "^0.0.8",
