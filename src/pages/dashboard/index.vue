@@ -5,10 +5,9 @@ import { CircleUser, CreditCard, Menu, Package2, Search, Users, X } from "lucide
 import { useAuthStore } from "../../stores/auth";
 
 const authStore = useAuthStore();
-const tab = ref("pricing");
 const toggleSheet = ref(false);
 
-const componentToRender = ref<"invoice" | "pricing" | "profile">(authStore.profile?.isPaid ? "invoice" : "pricing");
+const componentToRender = ref<"invoice" | "pricing" | "profile">(true ? "invoice" : "pricing");
 
 const asyncComponents = {
   invoice: defineAsyncComponent(() => import("./invoice.vue")),
@@ -26,6 +25,26 @@ const paidNavItems = [
     icon: Package2,
     tab: "invoice",
   },
+  {
+    name: "Clients",
+    icon: Users,
+    tab: "clients",
+  },
+  {
+    name: "All Invoices",
+    icon: Search,
+    tab: "invoices",
+  },
+  {
+    name: "Billing",
+    icon: Package2,
+    tab: "billing",
+  },
+  {
+    name: "Profile",
+    icon: CircleUser,
+    tab: "profile",
+  },
 ];
 
 const unpaidNavItems = [
@@ -40,8 +59,8 @@ const unpaidNavItems = [
 ];
 
 const navItems = computed(() => {
-  return authStore.profile?.isPaid ? paidNavItems : unpaidNavItems;
-  //   return paidNavItems;
+  // return authStore.profile?.isPaid ? paidNavItems : unpaidNavItems;
+  return true ? paidNavItems : unpaidNavItems;
 });
 
 // Error handling for Suspense
@@ -55,9 +74,9 @@ const onError = (error: any) => {
     <header class="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
       <nav
         class="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6 flex-grow">
-        <a href="#" class="flex items-center gap-2 text-lg font-semibold md:text-base">
+        <a href="/" class="flex items-center gap-2 text-lg font-semibold md:text-base">
           <Package2 class="h-6 w-6" />
-          <span class="sr-only">Eazy Invoice</span>
+          <span>Eazy Invoice</span>
         </a>
 
         <div class="flex flex-row gap-5 flex-grow justify-around max-w-fit">
@@ -71,7 +90,7 @@ const onError = (error: any) => {
             "
             class="cursor-pointer"
             :class="[
-              tab === item.tab ? 'text-foreground' : 'text-muted-foreground',
+              componentToRender === item.tab ? 'text-foreground' : 'text-muted-foreground',
               'transition-colors hover:text-foreground',
             ]">
             <div class="flex items-center gap-2">
@@ -80,25 +99,20 @@ const onError = (error: any) => {
           </span>
         </div>
       </nav>
-      <Sheet :open="toggleSheet">
+      <Sheet v-model:open="toggleSheet">
         <Button variant="outline" size="icon" class="shrink-0 md:hidden" @click="toggleSheet = !toggleSheet">
           <Menu class="h-5 w-5" />
           <span class="sr-only">Toggle navigation menu</span>
         </Button>
-        <SheetContent side="left" @interact-outside="() => (toggleSheet = false)" :removeClose="true">
-          <div class="flex flex-row gap-4 justify-between mb-4">
-            <div>
-              <SheetTitle>
-                <a href="#" class="flex items-center gap-2 text-lg font-semibold">
-                  <Package2 class="h-6 w-6" />
-                  <span>Eazy Invoice</span>
-                </a>
-              </SheetTitle>
-              <SheetDescription>Choose a component to render</SheetDescription>
-            </div>
-            <SheetClose class="mb-auto" @click="toggleSheet = false">
-              <X class="h-4 w-4" />
-            </SheetClose>
+        <SheetContent side="left">
+          <div class="flex flex-col gap-1 justify-between mb-4">
+            <SheetTitle>
+              <a href="#" class="flex items-center gap-2 text-lg font-semibold">
+                <Package2 class="h-6 w-6" />
+                <span>Eazy Invoice</span>
+              </a>
+            </SheetTitle>
+            <SheetDescription>Choose a component to render</SheetDescription>
           </div>
           <nav class="grid gap-6 text-lg font-medium">
             <span
@@ -112,7 +126,7 @@ const onError = (error: any) => {
               "
               class="cursor-pointer"
               :class="[
-                tab === item.tab ? 'text-foreground' : 'text-muted-foreground',
+                componentToRender === item.tab ? 'text-foreground' : 'text-muted-foreground',
                 'transition-colors hover:text-foreground',
               ]">
               <div class="flex items-center gap-2">
@@ -123,12 +137,13 @@ const onError = (error: any) => {
           </nav>
         </SheetContent>
       </Sheet>
-      <div class="flex w-full items-center gap-4 md:ml-auto md:gap-2 lg:gap-4"></div>
+      <!-- <div class="flex w-full items-center gap-4 md:ml-auto md:gap-2 lg:gap-4"></div> -->
     </header>
     <main class="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
       <Suspense @error="onError">
         <template #default>
-          <component :is="currentComponent" />
+          <component v-if="asyncComponents[componentToRender]" :is="currentComponent" />
+          <div v-else>Coming Soon...</div>
         </template>
         <template #fallback>
           <div class="flex items-center justify-center p-8">
