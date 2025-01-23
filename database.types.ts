@@ -94,11 +94,11 @@ export type Database = {
           business_id: string | null
           city: string | null
           country: string | null
-          created_at: string
+          created_at?: string
           currency: string
-          deleted_at: string | null
+          deleted_at?: string | null
           email: string
-          id: string
+          id?: string
           name: string
           next_invoice_number: number
           phone: string | null
@@ -106,7 +106,7 @@ export type Database = {
           state: string | null
           street_address: string | null
           tax_type: string
-          updated_at: string
+          updated_at?: string
         }
         Insert: {
           account_id: string

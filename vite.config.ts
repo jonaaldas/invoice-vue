@@ -24,7 +24,7 @@ export default defineConfig({
     /\.vue\?vue/,
     /\.md$/,
   ],
-      imports: ['vue', VueRouterAutoImports, 'pinia'],
+      imports: ['vue', VueRouterAutoImports, 'pinia', ],
       dts: true, 
       viteOptimizeDeps: true
     }), vue()],

@@ -1,12 +1,15 @@
 <template>
-  <Card class="p-6 container mx-auto max-w-screen-lg">
+  <Card class="container p-6 mx-auto max-w-screen-lg">
     <CardHeader>
       <CardTitle>Create Invoice</CardTitle>
       <CardDescription>Create a new invoice</CardDescription>
     </CardHeader>
     <CardContent>
-      <!-- <ClientSelection class="col-span-12 sm:col-span-6" /> -->
       <form id="invoiceForm" @submit.prevent="onSubmit" class="grid grid-cols-12 gap-4">
+        <div class="flex flex-col col-span-12 gap-4 sm:col-start-1 sm:col-end-5">
+          <ClientSelection class="col-span-12 sm:col-start-1 sm:col-end-5" @select="handleClientSelection" />
+          <div v-if="Object.keys(client).length == 0" class="text-small text-red">Please select a client</div>
+        </div>
         <FormField v-slot="{ componentField }" name="invoiceNumber">
           <FormItem class="col-span-12 sm:col-start-8 sm:col-end-13">
             <FormLabel>Invoice Number</FormLabel>
@@ -40,18 +43,18 @@
 
         <!-- Line Items Section -->
         <div class="col-span-12">
-          <div class="flex items-center justify-between">
+          <div class="flex justify-between items-center">
             <h3 class="text-lg font-medium">Line Items</h3>
             <Button type="button" variant="outline" size="sm" @click="addLineItem">
-              <PlusIcon class="h-4 w-4 mr-2" />
+              <PlusIcon class="mr-2 w-4 h-4" />
               Add Item
             </Button>
           </div>
 
-          <div
-            v-for="(item, index) in form.values.lineItems"
+          <divvv
+            v-for="(_, index) in form.values.lineItems"
             :key="index"
-            class="inline-flex items-center justify-center w-full gap-4">
+            class="inline-flex gap-4 justify-center items-center w-full">
             <FormField :name="`lineItems.${index}.description`" v-slot="{ componentField }">
               <FormItem class="w-[60%] h-[120px]">
                 <FormLabel>Description</FormLabel>
@@ -83,29 +86,29 @@
             </FormField>
 
             <div class="w-[10%] flex">
-              <Button type="button" variant="destructive" size="icon" @click="removeLineItem(index)" class="h-10 w-10">
-                <TrashIcon class="h-4 w-4" />
+              <Button type="button" variant="destructive" size="icon" @click="removeLineItem(index)" class="w-10 h-10">
+                <TrashIcon class="w-4 h-4" />
               </Button>
             </div>
-          </div>
+          </divvv>
 
-          <div v-if="!form.values.lineItems?.length" class="text-center p-8 border border-dashed rounded-lg">
+          <div v-if="!form.values.lineItems?.length" class="p-8 text-center rounded-lg border border-dashed">
             <p class="text-muted-foreground">No items added yet. Click the "Add Item" button to add your first item.</p>
           </div>
         </div>
         <!-- Totals Section -->
         <div class="col-span-12 ml-auto">
-          <div class="w-full flex flex-row items-center mt-2 gap-2">
+          <div class="flex flex-row gap-2 items-center mt-2 w-full">
             <span class="font-medium">Subtotal</span>
             <span class="ml-auto">{{ formatCurrency(calculateSubtotal) }}</span>
           </div>
 
-          <div class="w-full flex flex-row items-center mt-2">
+          <div class="flex flex-row items-center mt-2 w-full">
             <span class="font-medium">Tax</span>
             <span class="ml-auto">{{ formatCurrency(calculateTax) }}</span>
           </div>
 
-          <div class="w-full flex flex-row items-center mt-2">
+          <div class="flex flex-row items-center mt-2 w-full">
             <span class="font-medium">Total</span>
             <span class="ml-auto text-lg font-bold">{{ formatCurrency(calculateTotal) }}</span>
           </div>
@@ -120,7 +123,7 @@
 </template>
 
 <script setup lang="ts">
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "../components/ui/card";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "../components/ui/card";
 import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
 import ClientSelection from "./client_selection.vue";
@@ -131,6 +134,7 @@ import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessa
 import { toTypedSchema } from "@vee-validate/zod";
 import * as z from "zod";
 import { useForm } from "vee-validate";
+import type { Tables } from "../../database.types";
 
 interface LineItem {
   description: string;
@@ -138,25 +142,25 @@ interface LineItem {
   price: number;
 }
 
-const clientSchema = z.object({
-  id: z.string(),
-  accountId: z.string(),
-  businessId: z.string(),
+const clientSchema: z.ZodType<Tables<"clients">> = z.object({
+  account_id: z.string(),
+  business_id: z.string().nullable(),
   name: z.string(),
   email: z.string(),
-  phone: z.string().optional(),
-  address: z.string().optional(),
-  city: z.string().optional(),
-  state: z.string().optional(),
-  postalCode: z.string().optional(),
-  country: z.string().optional(),
-  taxType: z.string().optional(),
   currency: z.string(),
-  nextInvoiceNumber: z.number(),
+  next_invoice_number: z.number(),
+  phone: z.string().nullable(),
+  address: z.string().nullable(),
+  street_address: z.string().nullable(),
+  city: z.string().nullable(),
+  state: z.string().nullable(),
+  postal_code: z.string().nullable(),
+  country: z.string().nullable(),
+  tax_type: z.string(),
 });
 
-const client = ref<Client>({});
-const taxRate = ref(10); // Default tax rate, can be made dynamic based on client/settings
+const client = ref<Tables<"clients">>({});
+const taxRate = ref(10);
 
 const formSchema = toTypedSchema(
   z.object({
@@ -204,13 +208,13 @@ const removeLineItem = (index: number) => {
   } else {
     form.setFieldValue(
       "lineItems",
-      currentItems.filter((_, i) => i !== index)
+      currentItems.filter((_: LineItem, i: number) => i !== index)
     );
   }
 };
 
 const calculateSubtotal = computed(() => {
-  return form.values.lineItems.reduce((sum, item) => {
+  return form.values.lineItems.reduce((sum: number, item: LineItem) => {
     return sum + item.quantity * item.price;
   }, 0);
 });
@@ -233,14 +237,17 @@ const formatCurrency = (value: number) => {
 const emit = defineEmits(["form-data"]);
 
 const onSubmit = form.handleSubmit((values) => {
+  console.log("Hey");
   const totalValidation = totalSchema.safeParse({
     subtotal: calculateSubtotal.value,
     tax: calculateTax.value,
     total: calculateTotal.value,
   });
+  // check for client validation
+  const validation = clientSchema.safeParse(client.value);
 
-  if (!totalValidation.success) {
-    console.error("Total validation failed:", totalValidation.error);
+  if (!totalValidation.success || !validation.success) {
+    console.error("Total or client validation failed:", totalValidation.error, validation.error);
     return;
   }
 
@@ -249,10 +256,13 @@ const onSubmit = form.handleSubmit((values) => {
     subtotal: calculateSubtotal.value,
     tax: calculateTax.value,
     total: calculateTotal.value,
+    client: client.value,
   });
 });
 
-const goToNextStep = inject("goToNextStep") as () => void;
+const handleClientSelection = (value: Tables<"clients">) => {
+  client.value = value;
+};
 </script>
 
 <style scoped></style>
