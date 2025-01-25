@@ -1,22 +1,28 @@
 <script setup lang="ts">
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTitle, SheetDescription, SheetClose } from "@/components/ui/sheet";
-import { CircleUser, CreditCard, Menu, Package2, Search, Users, X } from "lucide-vue-next";
-import { useAuthStore } from "../../stores/auth";
+import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+import { CircleUser, Menu, Package2, Search, Users } from "lucide-vue-next";
+import { useRoute } from "vue-router";
+const route = useRoute();
 
-const authStore = useAuthStore();
+type AsyncComponents = {
+  invoice: any;
+  pricing: any;
+  profile: any;
+};
+type AsyncComponentKey = keyof AsyncComponents;
 const toggleSheet = ref(false);
+const componentToRender = ref<AsyncComponentKey>("invoice");
 
-const componentToRender = ref<"invoice" | "pricing" | "profile">(true ? "invoice" : "pricing");
-
-const asyncComponents = {
+const asyncComponents: AsyncComponents = {
   invoice: defineAsyncComponent(() => import("./invoice.vue")),
   pricing: defineAsyncComponent(() => import("./pricing.vue")),
   profile: defineAsyncComponent(() => import("./profile.vue")),
 };
 
 const currentComponent = computed(() => {
-  return asyncComponents[componentToRender.value];
+  const key = componentToRender.value as AsyncComponentKey;
+  return asyncComponents[key];
 });
 
 const paidNavItems = [
@@ -67,19 +73,25 @@ const navItems = computed(() => {
 const onError = (error: any) => {
   console.error("Error loading component:", error);
 };
+
+onMounted(() => {
+  if (route.query.tab) {
+    componentToRender.value = route.query.tab as AsyncComponentKey;
+  }
+});
 </script>
 
 <template>
-  <div class="flex min-h-screen w-full flex-col">
-    <header class="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
+  <div class="flex flex-col w-full min-h-screen">
+    <header class="flex sticky top-0 gap-4 items-center px-4 h-16 border-b bg-background md:px-6">
       <nav
-        class="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6 flex-grow">
-        <a href="/" class="flex items-center gap-2 text-lg font-semibold md:text-base">
-          <Package2 class="h-6 w-6" />
+        class="hidden flex-col flex-grow gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
+        <a href="/" class="flex gap-2 items-center text-lg font-semibold md:text-base">
+          <Package2 class="w-6 h-6" />
           <span>Eazy Invoice</span>
         </a>
 
-        <div class="flex flex-row gap-5 flex-grow justify-around max-w-fit">
+        <div class="flex flex-row flex-grow gap-5 justify-around max-w-fit">
           <span
             v-for="item in navItems"
             :key="item.tab"
@@ -93,7 +105,7 @@ const onError = (error: any) => {
               componentToRender === item.tab ? 'text-foreground' : 'text-muted-foreground',
               'transition-colors hover:text-foreground',
             ]">
-            <div class="flex items-center gap-2">
+            <div class="flex gap-2 items-center">
               {{ item.name }}
             </div>
           </span>
@@ -101,14 +113,14 @@ const onError = (error: any) => {
       </nav>
       <Sheet v-model:open="toggleSheet">
         <Button variant="outline" size="icon" class="shrink-0 md:hidden" @click="toggleSheet = !toggleSheet">
-          <Menu class="h-5 w-5" />
+          <Menu class="w-5 h-5" />
           <span class="sr-only">Toggle navigation menu</span>
         </Button>
         <SheetContent side="left">
           <div class="flex flex-col gap-1 justify-between mb-4">
             <SheetTitle>
-              <a href="#" class="flex items-center gap-2 text-lg font-semibold">
-                <Package2 class="h-6 w-6" />
+              <a href="#" class="flex gap-2 items-center text-lg font-semibold">
+                <Package2 class="w-6 h-6" />
                 <span>Eazy Invoice</span>
               </a>
             </SheetTitle>
@@ -129,26 +141,26 @@ const onError = (error: any) => {
                 componentToRender === item.tab ? 'text-foreground' : 'text-muted-foreground',
                 'transition-colors hover:text-foreground',
               ]">
-              <div class="flex items-center gap-2">
-                <component :is="item.icon" v-if="item.icon" class="h-4 w-4" />
+              <div class="flex gap-2 items-center">
+                <component :is="item.icon" v-if="item.icon" class="w-4 h-4" />
                 {{ item.name }}
               </div>
             </span>
           </nav>
         </SheetContent>
       </Sheet>
-      <!-- <div class="flex w-full items-center gap-4 md:ml-auto md:gap-2 lg:gap-4"></div> -->
+      <!-- <div class="flex gap-4 items-center w-full md:ml-auto md:gap-2 lg:gap-4"></div> -->
     </header>
-    <main class="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
+    <main class="flex flex-col flex-1 gap-4 p-4 md:gap-8 md:p-8">
       <Suspense @error="onError">
         <template #default>
           <component v-if="asyncComponents[componentToRender]" :is="currentComponent" />
           <div v-else>Coming Soon...</div>
         </template>
         <template #fallback>
-          <div class="flex items-center justify-center p-8">
+          <div class="flex justify-center items-center p-8">
             <div class="space-y-4 text-center">
-              <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+              <div class="w-12 h-12 rounded-full border-b-2 animate-spin border-primary"></div>
               <p class="text-muted-foreground">Loading...</p>
             </div>
           </div>

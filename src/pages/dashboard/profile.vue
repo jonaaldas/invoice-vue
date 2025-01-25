@@ -1,6 +1,6 @@
 <template>
-  <div class="container mx-auto p-4">
-    <Card class="w-full max-w-2xl mx-auto">
+  <div class="container p-4 mx-auto">
+    <Card class="mx-auto w-full max-w-2xl">
       <CardHeader>
         <CardTitle>Profile Information</CardTitle>
         <CardDescription> Your personal information and subscription status </CardDescription>
@@ -9,7 +9,7 @@
         <div class="space-y-8">
           <!-- Existing profile information -->
           <div class="space-y-4">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div class="space-y-2">
                 <p class="text-sm font-medium text-muted-foreground">Full Name</p>
                 <p class="text-lg font-medium">{{ fullName }}</p>
@@ -33,9 +33,11 @@
             </div>
           </div>
 
+          <BusinessProfileForm />
+
           <!-- Password Change Form -->
-          <div class="border-t pt-6">
-            <h3 class="text-lg font-medium mb-4">Change Password</h3>
+          <div class="pt-6 border-t">
+            <h3 class="mb-4 text-lg font-medium">Change Password</h3>
             <form @submit.prevent="onSubmit" id="reset-password">
               <div class="space-y-4">
                 <FormField name="currentPassword" v-slot="{ componentField }">
@@ -76,15 +78,12 @@
           </div>
         </div>
       </CardContent>
-      <CardFooter class="flex justify-end space-x-2">
-        <Button variant="outline" @click="fetchProfile">Refresh</Button>
-      </CardFooter>
     </Card>
   </div>
 </template>
 
 <script setup lang="ts">
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/stores/auth";
 import { supabase } from "../../supabase";
@@ -92,6 +91,7 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/comp
 import { Input } from "@/components/ui/input";
 import * as z from "zod";
 import { useForm } from "vee-validate";
+import BusinessProfileForm from "@/components/business_profile_form.vue";
 import { toTypedSchema } from "@vee-validate/zod";
 
 const authStore = useAuthStore();
@@ -138,22 +138,5 @@ const onSubmit = form.handleSubmit(async (values) => {
   } finally {
     loading.value = false;
   }
-});
-
-const fetchProfile = async () => {
-  try {
-    const { data, error } = await supabase.from("profiles").select("*").eq("id", authStore.user?.id).single();
-
-    if (error) throw error;
-    if (data) {
-      authStore.setProfile(data);
-    }
-  } catch (error) {
-    console.error("Error fetching profile:", error);
-  }
-};
-
-onMounted(() => {
-  fetchProfile();
 });
 </script>

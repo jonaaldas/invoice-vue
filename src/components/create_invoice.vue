@@ -51,7 +51,7 @@
             </Button>
           </div>
 
-          <divvv
+          <div
             v-for="(_, index) in form.values.lineItems"
             :key="index"
             class="inline-flex gap-4 justify-center items-center w-full">
@@ -90,7 +90,7 @@
                 <TrashIcon class="w-4 h-4" />
               </Button>
             </div>
-          </divvv>
+          </div>
 
           <div v-if="!form.values.lineItems?.length" class="p-8 text-center rounded-lg border border-dashed">
             <p class="text-muted-foreground">No items added yet. Click the "Add Item" button to add your first item.</p>
@@ -263,6 +263,13 @@ const onSubmit = form.handleSubmit((values) => {
 const handleClientSelection = (value: Tables<"clients">) => {
   client.value = value;
 };
+
+watch(client, () => {
+  if (client.value) {
+    console.log("Client changed:", client.value);
+    form.setFieldValue("invoiceNumber", client.value.next_invoice_number);
+  }
+});
 </script>
 
 <style scoped></style>

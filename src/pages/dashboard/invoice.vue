@@ -60,8 +60,10 @@ import { CheckIcon, CircleIcon, DotIcon } from "lucide-vue-next";
 import CreateInvoice from "@/components/create_invoice.vue";
 import InvoicePreview from "@/components/invoice_preview.vue";
 import { supabase } from "@/supabase";
-import { v4 as uuidv4 } from "uuid";
+import { useAuthStore } from "@/stores/auth";
+import html2pdf from "html2pdf.js";
 
+const router = useRouter();
 const stepIndex = ref(1);
 
 const steps = [
@@ -93,88 +95,80 @@ function handleFormPopulate(formValues: any) {
 
 async function handleEmailSchedule(scheduleData: any) {
   try {
-    const invoiceId = uuidv4();
     const accountId = (await supabase.auth.getUser()).data.user?.id;
 
     if (!accountId || !form.value) {
       throw new Error("Missing required data");
     }
 
-    // Create invoice record
-    const invoiceData = {
-      id: invoiceId,
-      account_id: accountId,
-      business_id: form.value.businessId,
-      client_id: form.value.clientId,
-      invoice_date: form.value.invoiceDate,
-      due_date: form.value.dueDate,
-      invoice_number: form.value.invoiceNumber,
-      subtotal: form.value.subtotal,
-      tax_amount: form.value.taxAmount,
-      total: form.value.total,
-      status: "scheduled",
-      email_status: "pending",
-      scheduled_send_date: scheduleData.sendDate,
-    };
-
-    const { error: invoiceError } = await supabase.from("invoices").insert(invoiceData);
-
-    if (invoiceError) throw invoiceError;
-
-    // Create invoice items
-    const invoiceItems = form.value.items.map((item: any) => ({
-      id: uuidv4(),
-      invoice_id: invoiceId,
-      account_id: accountId,
-      business_id: form.value.businessId,
-      description: item.description,
-      quantity: item.quantity,
-      unit_price: item.unitPrice,
-      amount: item.amount,
-    }));
-
-    const { error: itemsError } = await supabase.from("invoice_items").insert(invoiceItems);
-
-    if (itemsError) throw itemsError;
-
-    // If recurring is enabled, create recurring configuration
-    if (scheduleData.recurring) {
-      const recurringConfig = {
-        id: uuidv4(),
-        account_id: accountId,
-        business_id: form.value.businessId,
-        client_id: form.value.clientId,
-        frequency: scheduleData.frequency,
-        duration: scheduleData.duration,
-        email_subject: scheduleData.emailSubject,
-        email_body: scheduleData.emailBody,
-        email_to: scheduleData.emailTo,
-        status: "active",
-        next_send_date: scheduleData.sendDate,
-      };
-
-      const { error: recurringError } = await supabase.from("recurring_configs").insert(recurringConfig);
-
-      if (recurringError) throw recurringError;
-    }
-
+    const clientId = form.value.client.id;
     emailSchedule.value = scheduleData;
+    let { error } = await supabase.rpc("create_save_recurring_invoice", {
+      account_id: useAuthStore().user.id,
+      // make sure to get business id from client and save it in the store
+      business_id: form.value.businessId || "afc3deae-d561-4268-8a26-f38d0347196a",
+      client_id: clientId,
+      frequency: scheduleData.frequency,
+      email_subject: scheduleData.subject,
+      email_body: scheduleData.content,
+      email_to: scheduleData.email,
+      next_send_date: scheduleData.sendDate,
+      due_date: form.value.dueDate,
+      invoice_date: form.value.invoiceDate,
+      items: form.value.lineItems,
+      subtotal: form.value.subtotal,
+      tax_amount: form.value.tax,
+      total: form.value.total,
+    });
+    if (error) throw error;
+    window.toaster("Success", "Invoice saved");
+    router.push("/dashboard?tab=invoice");
   } catch (error) {
     console.error("Error saving invoice:", error);
     throw error;
   }
 }
 
-const handleInvoiceSafeAfterDownload = (value: boolean) => {
+const handleInvoiceSafeAfterDownload = async (value: boolean) => {
   if (!value) {
     window.toaster("Failed", "There was an error downloading and saving your invoice", "destructive");
     return;
   }
-  // save invoice
+
+  const clientId = form.value.client.id;
+
+  let { error } = await supabase.rpc("create_save_invoice", {
+    account_id: useAuthStore().user.id,
+    client_id: clientId, // ✅ Matches 2nd SQL param
+    business_id: form.value.businessId || "afc3deae-d561-4268-8a26-f38d0347196a", // ✅ 3rd SQL param
+    invoice_date: form.value.invoiceDate, // ✅ 4th SQL param (now before due_date)
+    due_date: form.value.dueDate, // ✅ 5th SQL param
+    subtotal: form.value.subtotal, // ✅ 6th SQL param
+    tax_amount: form.value.tax, // ✅ 7th SQL param
+    total: form.value.total, // ✅ 8th SQL param
+    items: form.value.lineItems, // ✅ 9th SQL param (moved to last)
+  });
+
+  if (error) throw error;
+
+  let element = document.getElementById("invoice-preview-download");
+  let opt = {
+    margin: 10,
+    filename: `Invoice`,
+    image: { type: "jpeg", quality: 1 },
+    html2canvas: { scale: 3, useCORS: true, scrollY: 0 },
+    jsPDF: { unit: "pt", format: "letter", orientation: "portrait", compressPDF: true },
+  };
+  html2pdf()
+    .from(element)
+    .set(opt)
+    .toPdf()
+    .get("pdf")
+    .save()
+    .then(() => {});
+
   window.toaster("Success", "Invoice saved");
-  // redirect to invoices page
-  const router = useRouter();
-  router.push("/dashboard/invoices");
+  router.push("/dashboard?tab=invoice");
 };
 
 provide("goToNextStep", goToNextStep);

@@ -6,7 +6,6 @@ import { toTypedSchema } from "@vee-validate/zod";
 import * as z from "zod";
 import { useForm } from "vee-validate";
 import { FormField, FormItem, FormControl, FormLabel, FormMessage } from "@/components/ui/form";
-import { supabase } from "../supabase/index";
 import { useRouter } from "vue-router";
 import { register } from "../utils/supaAuth";
 
@@ -43,7 +42,7 @@ const onSubmit = form.handleSubmit(async (values) => {
 </script>
 
 <template>
-  <Card class="mx-auto max-w-sm mt-40">
+  <Card class="mx-auto mt-40 max-w-sm">
     <CardHeader>
       <CardTitle class="text-xl">Sign Up</CardTitle>
       <CardDescription>Enter your information to create an account</CardDescription>
@@ -93,7 +92,7 @@ const onSubmit = form.handleSubmit(async (values) => {
         </FormField>
 
         <Button type="submit" class="w-full">Create an account</Button>
-        <Button variant="outline" class="w-full flex flex-row gap-2">
+        <Button variant="outline" class="flex flex-row gap-2 w-full">
           <svg
             class="size-6"
             width="256"
@@ -116,7 +115,7 @@ const onSubmit = form.handleSubmit(async (values) => {
           </svg>
           Login with Google
         </Button>
-        <div class="mt-4 text-center text-sm">
+        <div class="mt-4 text-sm text-center">
           Already have an account?
           <a href="/login" class="underline">Log in</a>
         </div>
