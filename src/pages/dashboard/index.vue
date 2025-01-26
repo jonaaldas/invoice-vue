@@ -9,6 +9,7 @@ type AsyncComponents = {
   invoice: any;
   pricing: any;
   profile: any;
+  clients: any;
 };
 type AsyncComponentKey = keyof AsyncComponents;
 const toggleSheet = ref(false);
@@ -18,6 +19,7 @@ const asyncComponents: AsyncComponents = {
   invoice: defineAsyncComponent(() => import("./invoice.vue")),
   pricing: defineAsyncComponent(() => import("./pricing.vue")),
   profile: defineAsyncComponent(() => import("./profile.vue")),
+  clients: defineAsyncComponent(() => import("./clients.vue")),
 };
 
 const currentComponent = computed(() => {

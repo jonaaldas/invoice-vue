@@ -63,7 +63,6 @@ import { supabase } from "@/supabase";
 import { useAuthStore } from "@/stores/auth";
 import html2pdf from "html2pdf.js";
 
-const router = useRouter();
 const stepIndex = ref(1);
 
 const steps = [
@@ -113,7 +112,7 @@ async function handleEmailSchedule(scheduleData: ScheduleData) {
 
     const invoiceData = {
       account_id: useAuthStore().user.id,
-      business_id: form.value.businessId || "5bde3ae6-dac8-4e0c-82d3-bdff505e470d",
+      business_id: useAuthStore().business[0].id,
       client_id: form.value.client.id,
       frequency: scheduleData.isScheduled ? scheduleData.frequency : "none",
       email_subject: scheduleData.subject,
@@ -153,14 +152,14 @@ const handleInvoiceSafeAfterDownload = async (value: boolean) => {
 
   let { error } = await supabase.rpc("create_save_invoice", {
     account_id: useAuthStore().user.id,
-    client_id: clientId, //
-    business_id: form.value.businessId || "5bde3ae6-dac8-4e0c-82d3-bdff505e470d", //
-    invoice_date: form.value.invoiceDate, //
-    due_date: form.value.dueDate, //
-    subtotal: form.value.subtotal, //
-    tax_amount: form.value.tax, //
-    total: form.value.total, //
-    items: form.value.lineItems, //
+    client_id: clientId,
+    business_id: useAuthStore().business[0].id,
+    invoice_date: form.value.invoiceDate,
+    due_date: form.value.dueDate,
+    subtotal: form.value.subtotal,
+    tax_amount: form.value.tax,
+    total: form.value.total,
+    items: form.value.lineItems,
   });
 
   if (error) {

@@ -439,7 +439,6 @@ const getAllClientData = async (account_id: string) => {
 onMounted(async () => {
   const clientData = await getAllClientData(authStore.user.id);
   if (clientData) {
-    console.log("🚀 ~ onMounted ~ clientData:", clientData);
     clients.value = clientData;
   }
 });
