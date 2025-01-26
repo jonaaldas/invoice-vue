@@ -74,6 +74,15 @@ const onError = (error: any) => {
   console.error("Error loading component:", error);
 };
 
+watch(
+  () => route.query.tab,
+  (newTab: string) => {
+    console.log("🚀 ~ watch ~ newTab:", newTab);
+    if (!newTab) return;
+    componentToRender.value = newTab as AsyncComponentKey;
+  }
+);
+
 onMounted(() => {
   if (route.query.tab) {
     componentToRender.value = route.query.tab as AsyncComponentKey;
@@ -98,6 +107,7 @@ onMounted(() => {
             @click="
               () => {
                 componentToRender = item.tab;
+                $router.push({ tab: item.tab });
               }
             "
             class="cursor-pointer"
@@ -133,6 +143,7 @@ onMounted(() => {
               @click="
                 () => {
                   componentToRender = item.tab;
+                  $router.push({ tab: item.tab });
                   toggleSheet = false;
                 }
               "

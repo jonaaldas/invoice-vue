@@ -136,7 +136,7 @@ async function handleEmailSchedule(scheduleData: ScheduleData) {
     }
 
     window.toaster("Success", "Invoice saved");
-    router.push(`/dashboard?tab=invoice${scheduleData.isScheduled ? "s" : ""}`);
+    window.location.href = `/dashboard?tab=invoice${scheduleData.isScheduled ? "s" : ""}`;
   } catch (error) {
     console.error("Error saving invoice:", error);
     throw error;
@@ -185,7 +185,7 @@ const handleInvoiceSafeAfterDownload = async (value: boolean) => {
     .then(() => {});
 
   window.toaster("Success", "Invoice saved");
-  router.push("/dashboard?tab=invoices");
+  window.location.href = "/dashboard?tab=invoices";
 };
 
 provide("goToNextStep", goToNextStep);
