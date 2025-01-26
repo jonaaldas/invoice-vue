@@ -182,10 +182,10 @@ const handleInvoiceSafeAfterDownload = async (value: boolean) => {
     .toPdf()
     .get("pdf")
     .save()
-    .then(() => {});
-
-  window.toaster("Success", "Invoice saved");
-  window.location.href = "/dashboard?tab=invoices";
+    .then(() => {
+      window.toaster("Success", "Invoice saved");
+      window.location.href = "/dashboard?tab=invoices";
+    });
 };
 
 provide("goToNextStep", goToNextStep);

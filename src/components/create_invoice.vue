@@ -105,9 +105,13 @@
 
           <div class="flex flex-row items-center mt-2 w-full">
             <span class="font-medium">Tax</span>
+            <FormField :name="`taxRate`" v-slot="{ componentField }">
+              <FormControl>
+                <Input type="number" min="0" max="100" v-bind="componentField" />
+              </FormControl>
+            </FormField>
             <span class="ml-auto">{{ formatCurrency(calculateTax) }}</span>
           </div>
-
           <div class="flex flex-row items-center mt-2 w-full">
             <span class="font-medium">Total</span>
             <span class="ml-auto text-lg font-bold">{{ formatCurrency(calculateTotal) }}</span>
@@ -127,8 +131,6 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "../co
 import { Input } from "../components/ui/input";
 import { Button } from "../components/ui/button";
 import ClientSelection from "./client_selection.vue";
-// import { Popover, PopoverContent, PopoverTrigger } from "../components/ui/popover";
-// import { Calendar } from "../components/ui/calendar";
 import { PlusIcon, TrashIcon } from "lucide-vue-next";
 import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "../components/ui/form";
 import { toTypedSchema } from "@vee-validate/zod";
@@ -160,7 +162,6 @@ const clientSchema: z.ZodType<Tables<"clients">> = z.object({
 });
 
 const client = ref<Tables<"clients">>({});
-const taxRate = ref(10);
 
 const formSchema = toTypedSchema(
   z.object({
@@ -220,7 +221,7 @@ const calculateSubtotal = computed(() => {
 });
 
 const calculateTax = computed(() => {
-  return Number((calculateSubtotal.value * (taxRate.value / 100)).toFixed(2));
+  return Number((calculateSubtotal.value * (form.values.taxRate || 0 / 100)).toFixed(2));
 });
 
 const calculateTotal = computed(() => {
@@ -243,7 +244,6 @@ const onSubmit = form.handleSubmit((values) => {
     tax: calculateTax.value,
     total: calculateTotal.value,
   });
-  // check for client validation
   const validation = clientSchema.safeParse(client.value);
 
   if (!totalValidation.success || !validation.success) {

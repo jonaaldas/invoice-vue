@@ -26,7 +26,19 @@
       <CardContent id="invoice-preview-download">
         <div class="grid grid-cols-12 gap-6">
           <!-- Invoice Details -->
-          <div class="flex col-span-12 justify-between">
+          <div class="flex flex-col col-span-6 justify-between">
+            <!-- <div>{{ form.client }}</div> -->
+            <h3 class="font-bold">{{ form.client.name }}</h3>
+            <p>{{ form.client.email }}</p>
+            <p>{{ form.client.phone }}</p>
+            <p>{{ form.client.address }}</p>
+            <div v-if="form.client.address" class="flex gap-2">
+              <span>{{ form.client.city }}</span>
+              <span>{{ form.client.state }}</span>
+              <span>{{ form.client.postal_code }}</span>
+            </div>
+          </div>
+          <div class="flex col-span-6 ml-auto justify-between">
             <div>
               <h3 class="mb-2 font-semibold">Invoice Details</h3>
               <div class="space-y-1 text-sm">
