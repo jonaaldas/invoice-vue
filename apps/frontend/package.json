@@ -32,6 +32,7 @@
   },
   "dependencies": {
     "@selemondev/vue3-marquee": "^0.0.8",
+    "@stripe/stripe-js": "^5.5.0",
     "@supabase/supabase-js": "^2.48.0",
     "@tiptap/extension-link": "^2.11.2",
     "@tiptap/pm": "^2.11.2",

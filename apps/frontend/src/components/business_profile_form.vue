@@ -84,7 +84,6 @@ import { useAuthStore } from "@/stores/auth";
 const authStore = useAuthStore();
 const businessProfile = computed(() => authStore.business[0]);
 const businessLoading = ref(false);
-
 const businessSchema = toTypedSchema(
   z.object({
     name: z.string().min(1, "Business name is required"),
