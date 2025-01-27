@@ -82,13 +82,14 @@ import { toTypedSchema } from "@vee-validate/zod";
 import { useAuthStore } from "@/stores/auth";
 
 const authStore = useAuthStore();
+const businessProfile = computed(() => authStore.business[0]);
 const businessLoading = ref(false);
 
 const businessSchema = toTypedSchema(
   z.object({
     name: z.string().min(1, "Business name is required"),
     email: z.string().email("Invalid email address"),
-    phone: z.string().min(1, "Phone number is required"),
+    phone: z.number().min(1, "Phone number is required"),
     address: z.string().min(1, "Address is required"),
     taxNumber: z.string().min(1, "Tax number is required"),
     defaultCurrency: z.string().min(1, "Currency is required").default("USD"),
@@ -102,24 +103,39 @@ const businessForm = useForm({
 const onBusinessSubmit = businessForm.handleSubmit(async (values) => {
   try {
     businessLoading.value = true;
-    const { error } = await supabase.from("business_profiles").upsert({
-      profile_id: authStore.user?.id,
-      name: values.name,
-      email: values.email,
-      phone: values.phone,
-      address: values.address,
-      tax_number: values.taxNumber,
-      default_currency: values.defaultCurrency,
-    });
+    const { error } = await supabase
+      .from("business_profiles")
+      .update({
+        profile_id: authStore.user?.id,
+        name: values.name,
+        email: values.email,
+        phone: values.phone,
+        address: values.address,
+        tax_number: values.taxNumber,
+        default_currency: values.defaultCurrency,
+      })
+      .eq("profile_id", authStore.user.id);
 
     if (error) throw error;
 
     window.toaster("Success", "Business profile updated successfully");
-    businessForm.resetForm();
   } catch (error: any) {
     window.toaster("Error", error.message, "destructive");
   } finally {
     businessLoading.value = false;
+  }
+});
+
+onMounted(() => {
+  if (businessProfile.value) {
+    businessForm.setValues({
+      name: businessProfile.value.name,
+      email: businessProfile.value.email,
+      phone: businessProfile.value.phone,
+      address: businessProfile.value.address,
+      taxNumber: businessProfile.value.tax_number,
+      defaultCurrency: businessProfile.value.default_currency,
+    });
   }
 });
 </script>
