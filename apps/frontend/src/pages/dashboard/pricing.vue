@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check } from "lucide-vue-next";
-import { api } from "@invoice/shared";
+import axios from "axios";
 
 interface Pricing {
   link: string;
@@ -14,7 +14,7 @@ interface Pricing {
 
 const pricing: Pricing[] = [
   {
-    link: "https://buy.stripe.com/test_28o14Wd0EdQf9nqdQT",
+    link: "https://buy.stripe.com/test_28o14WdQf9nqdQT",
     priceId: "price_1QXjUjATpO8jfWn5LQv6W0Qv",
     price: 0,
     duration: "month",
@@ -39,12 +39,12 @@ const pricing: Pricing[] = [
   },
 ];
 
-const handlePlanSelection = async (plan: Pricing) => {
+const handlePlanSelection = async () => {
   try {
-    const { data } = await api.post("/stripe/generate-customer");
-    console.log(data);
+    const response = await axios.post("/api/stripe/generate-customer");
+    console.log("Response:", response.data);
   } catch (error) {
-    console.error("Error fetching data:", error);
+    console.error("Error generating customer:", error);
   }
 };
 </script>
