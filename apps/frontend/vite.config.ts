@@ -7,7 +7,6 @@ import tailwind from "tailwindcss";
 import autoprefixer from "autoprefixer"
 import AutoImport from 'unplugin-auto-import/vite';
 import * as zod from "zod";
-import pinia from 'pinia'
 
 export default defineConfig({
   css: {
@@ -55,6 +54,13 @@ export default defineConfig({
     exclude: ['vue-demi']
   },
   plugins: [
+    vue({
+      template: {
+        compilerOptions: {
+          isCustomElement: (tag) => tag.includes('-')
+        }
+      }
+    }),
     VueRouter(),
     AutoImport({
       include: [
@@ -63,18 +69,20 @@ export default defineConfig({
         /\.vue\?vue/,
         /\.md$/,
       ],
-      imports: ['vue', VueRouterAutoImports, 'pinia', ],
-      dts: true, 
-      viteOptimizeDeps: true
-    }), 
-    vue({
-      template: {
-        compilerOptions: {
-          isCustomElement: (tag) => tag.includes('-')
+      imports: [
+        'vue',
+        VueRouterAutoImports,
+        {
+          'pinia': [
+            'createPinia',
+            'defineStore',
+            'storeToRefs'
+          ]
         }
-      }
-    }),
-    pinia
+      ],
+      dts: true,
+      viteOptimizeDeps: true
+    })
   ],
   server: {
     port: 3000,
