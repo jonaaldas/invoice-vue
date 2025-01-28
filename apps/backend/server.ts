@@ -1,12 +1,17 @@
 import express from "express";
 import path from "path";
+import cors from "cors";
 import { fileURLToPath } from "url";
+import { api } from "@invoice/shared";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 4000;
+
+app.use(cors());
+app.use(express.json());
 
 // Determine the correct path to the frontend dist directory
 const frontendDistPath =
@@ -16,6 +21,11 @@ const frontendDistPath =
 
 // Serve static files from the frontend dist directory
 app.use(express.static(frontendDistPath));
+
+// routes
+app.get("/api/hello", (req, res) => {
+  res.json({ message: "Hello from the backend!" });
+});
 
 // Handle SPA routing - return index.html for all routes
 app.get("*", (req, res) => {

@@ -1,6 +1,7 @@
 <template>
   <header class="flex sticky top-0 gap-4 items-center px-4 h-16 border-b bg-background md:px-6">
-    <nav class="hidden flex-col flex-grow gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
+    <nav
+      class="hidden flex-col flex-grow gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
       <a href="/" class="flex gap-2 items-center text-lg font-semibold md:text-base">
         <Package2 class="w-6 h-6" />
         <span>Eazy Invoice</span>
@@ -13,7 +14,7 @@
           v-show="item.name"
           @click="
             () => {
-              $router.push({ path: '/dashboard', query: { tab: item.tab } });
+              emit('update:current-tab', item.tab);
             }
           "
           class="cursor-pointer"
@@ -50,7 +51,7 @@
             v-show="item.name"
             @click="
               () => {
-                $router.push({ path: '/dashboard', query: { tab: item.tab } });
+                emit('update:current-tab', item.tab);
                 toggleSheet = false;
               }
             "
@@ -71,7 +72,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { CircleUser, Menu, Package2, Search, Users } from "lucide-vue-next";
@@ -80,40 +80,8 @@ const toggleSheet = ref(false);
 
 const props = defineProps<{
   currentTab?: string;
+  navItems?: any[];
 }>();
 
-const paidNavItems = [
-  {
-    name: "New Invoice",
-    icon: Package2,
-    tab: "invoice",
-  },
-  {
-    name: "Clients",
-    icon: Users,
-    tab: "clients",
-  },
-  {
-    name: "All Invoices",
-    icon: Search,
-    tab: "invoices",
-  },
-  {
-    name: "Billing",
-    icon: Package2,
-    tab: "billing",
-  },
-  {
-    name: "Profile",
-    icon: CircleUser,
-    tab: "profile",
-  },
-  {
-    tab: "client_id",
-  },
-];
-
-const navItems = computed(() => {
-  return paidNavItems;
-});
+const emit = defineEmits(["update:current-tab"]);
 </script>

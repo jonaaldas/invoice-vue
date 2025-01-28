@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check } from "lucide-vue-next";
+import { api } from "@invoice/shared";
 
 interface Pricing {
   link: string;
@@ -38,8 +39,13 @@ const pricing: Pricing[] = [
   },
 ];
 
-const handlePlanSelection = (plan: Pricing) => {
-  //  .. do something
+const handlePlanSelection = async (plan: Pricing) => {
+  try {
+    const { data } = await api.get("/hello");
+    console.log(data);
+  } catch (error) {
+    console.error("Error fetching data:", error);
+  }
 };
 </script>
 
