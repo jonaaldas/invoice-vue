@@ -243,17 +243,10 @@
 </template>
 
 <script setup lang="ts">
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "../components/ui/dialog";
-import { Button } from "../components/ui/button";
-import { Input } from "../components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "./ui/dialog";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import type { Tables } from "../../database.types";
 import { Check, UserPlus, Pencil, Trash, ChevronsUpDown } from "lucide-vue-next";
 import { cn } from "@/lib/utils";
@@ -267,13 +260,13 @@ import {
   CommandItem,
   CommandList,
   CommandSeparator,
-} from "../components/ui/command";
-import { Popover, PopoverContent, PopoverTrigger } from "../components/ui/popover";
+} from "./ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { HTMLAttributes } from "vue";
 import { toTypedSchema } from "@vee-validate/zod";
 import * as z from "zod";
 import { useForm } from "vee-validate";
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "../components/ui/form";
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "./ui/form";
 
 const clients = ref<Tables<"clients">[]>([]);
 const selectedClient = ref<Tables<"clients">>();
