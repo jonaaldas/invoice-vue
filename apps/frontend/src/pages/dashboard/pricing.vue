@@ -41,7 +41,7 @@ const pricing: Pricing[] = [
 
 const handlePlanSelection = async (plan: Pricing) => {
   try {
-    const { data } = await api.get("/hello");
+    const { data } = await api.post("/stripe/generate-customer");
     console.log(data);
   } catch (error) {
     console.error("Error fetching data:", error);
