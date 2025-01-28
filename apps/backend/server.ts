@@ -1,11 +1,23 @@
-import { serve } from "@hono/node-server";
-import app from "./api";
+import express from "express";
+import path from "path";
+import { fileURLToPath } from "url";
 
-const port = process.env.PORT || 4000;
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-console.log(`Server is running on port ${port}`);
+const app = express();
+const PORT = process.env.PORT || 4000;
 
-serve({
-  fetch: app.fetch,
-  port: Number(port),
+// Serve static files from the frontend dist directory
+app.use(express.static(path.join(__dirname, "../frontend/dist")));
+
+// Handle SPA routing - return index.html for all routes
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
 });
+
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
+
+export default app;
