@@ -19,22 +19,32 @@ export default defineConfig({
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
-        manualChunks: {
-          vendor: ['vue', 'vue-router', 'pinia'],
-          ui: ['@headlessui/vue', '@heroicons/vue'],
-        },
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('@headlessui/vue') || id.includes('@heroicons/vue')) {
+              return 'ui-libs';
+            }
+            if (id.includes('vue') || id.includes('pinia')) {
+              return 'vendor';
+            }
+            return 'dependencies';
+          }
+        }
       },
     },
+  },
+  optimizeDeps: {
+    include: ['@headlessui/vue', '@heroicons/vue'],
   },
   plugins: [
     VueRouter(),
     AutoImport({
       include: [
-    /\.[tj]sx?$/,
-    /\.vue$/,
-    /\.vue\?vue/,
-    /\.md$/,
-  ],
+        /\.[tj]sx?$/,
+        /\.vue$/,
+        /\.vue\?vue/,
+        /\.md$/,
+      ],
       imports: ['vue', VueRouterAutoImports, 'pinia', ],
       dts: true, 
       viteOptimizeDeps: true

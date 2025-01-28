@@ -31,6 +31,8 @@
     "supabase:db:types": "npx supabase gen types typescript --linked > database.types.ts"
   },
   "dependencies": {
+    "@headlessui/vue": "^1.7.19",
+    "@heroicons/vue": "^2.1.1",
     "@selemondev/vue3-marquee": "^0.0.8",
     "@stripe/stripe-js": "^5.5.0",
     "@supabase/supabase-js": "^2.48.0",
