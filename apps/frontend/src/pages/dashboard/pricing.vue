@@ -3,7 +3,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check } from "lucide-vue-next";
-import axios from "axios";
+import axios from "../../lib/axios";
+import { supabase } from "../../supabase";
 
 interface Pricing {
   link: string;
@@ -41,6 +42,7 @@ const pricing: Pricing[] = [
 
 const handlePlanSelection = async () => {
   try {
+    console.log("Running");
     const response = await axios.post("/api/stripe/generate-customer");
     console.log("Response:", response.data);
   } catch (error) {

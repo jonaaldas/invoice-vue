@@ -4,17 +4,22 @@ import cors from "cors";
 import { fileURLToPath } from "url";
 import { api } from "@invoice/shared";
 import createRouter from "express-file-routing";
+import cookieParser from "cookie-parser";
+import { authenticateToken } from "./middleware/auth.js";
 
 const startServer = async () => {
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = path.dirname(__filename);
-  console.log("🚀 ~ startServer ~ __dirname:", __dirname);
 
   const app = express();
   const PORT = process.env.PORT || 4000;
 
   app.use(cors());
   app.use(express.json());
+  app.use(cookieParser());
+
+  // Apply authentication middleware to API routes
+  app.use("/api", authenticateToken);
 
   // Set up file-based routing
   await createRouter(app, {
