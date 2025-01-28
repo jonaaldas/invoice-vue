@@ -5,14 +5,15 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "npm run install-deps && npm run build:frontend && npm run build:backend",
+    "build": "npm run install-deps && npm run build:frontend && npm run copy-frontend && npm run build:backend",
     "install-deps": "npm install && cd apps/frontend && npm install && cd ../backend && npm install",
     "build:frontend": "cd apps/frontend && npm run build",
     "build:backend": "cd apps/backend && npm run build",
+    "copy-frontend": "mkdir -p apps/backend/frontend && cp -r apps/frontend/dist apps/backend/frontend/",
     "dev:frontend": "cd apps/frontend && npm run dev",
     "dev:backend": "cd apps/backend && npm run dev",
     "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
-    "start": "cd apps/backend && npm run start"
+    "start": "cd apps/backend && NODE_ENV=production npm run start"
   },
   "keywords": [],
   "author": "",
