@@ -6,6 +6,8 @@ import { api } from "@invoice/shared";
 import createRouter from "express-file-routing";
 import cookieParser from "cookie-parser";
 import { authenticateToken } from "./middleware/auth.js";
+import { config } from "dotenv";
+config();
 
 const startServer = async () => {
   const __filename = fileURLToPath(import.meta.url);
