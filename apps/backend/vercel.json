@@ -2,15 +2,15 @@
   "version": 2,
   "builds": [
     {
-      "src": "dis/server.ts",
-      "use": "@vercel/node",
-      "config": { "includeFiles": ["dist/**"] }
+      "src": "server.ts",
+      "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "app.js"
+      "dest": "server.ts"
     }
-  ]
+  ],
+  "installCommand": "npm run install-deps"
 }
