@@ -19,22 +19,40 @@ export default defineConfig({
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
-        manualChunks(id) {
-          if (id.includes('node_modules')) {
-            if (id.includes('@headlessui/vue') || id.includes('@heroicons/vue')) {
-              return 'ui-libs';
-            }
-            if (id.includes('vue') || id.includes('pinia')) {
-              return 'vendor';
-            }
-            return 'dependencies';
-          }
+        manualChunks: {
+          'vue-vendor': ['vue', 'vue-router', '@vue/runtime-core', '@vue/runtime-dom'],
+          'pinia-vendor': ['pinia'],
+          'ui-vendor': ['@headlessui/vue', '@heroicons/vue']
         }
-      },
+      }
     },
+    commonjsOptions: {
+      esmExternals: true
+    },
+    target: 'esnext',
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        drop_console: true,
+        drop_debugger: true
+      }
+    }
+  },
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
+    dedupe: ['vue', 'vue-router', 'pinia']
   },
   optimizeDeps: {
-    include: ['@headlessui/vue', '@heroicons/vue'],
+    include: [
+      'vue',
+      'vue-router',
+      'pinia',
+      '@headlessui/vue',
+      '@heroicons/vue'
+    ],
+    exclude: ['vue-demi']
   },
   plugins: [
     VueRouter(),
@@ -48,12 +66,16 @@ export default defineConfig({
       imports: ['vue', VueRouterAutoImports, 'pinia', ],
       dts: true, 
       viteOptimizeDeps: true
-    }), vue()],
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
-    },
-  },
+    }), 
+    vue({
+      template: {
+        compilerOptions: {
+          isCustomElement: (tag) => tag.includes('-')
+        }
+      }
+    }),
+    pinia
+  ],
   server: {
     port: 3000,
   },
