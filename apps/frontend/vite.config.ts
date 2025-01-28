@@ -28,14 +28,13 @@ export default defineConfig({
     commonjsOptions: {
       esmExternals: true
     },
+    minify: 'esbuild',
     target: 'esnext',
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: true,
-        drop_debugger: true
-      }
-    }
+    sourcemap: false,
+    cssCodeSplit: true,
+    assetsInlineLimit: 4096,
+    emptyOutDir: true,
+    reportCompressedSize: false
   },
   resolve: {
     alias: {
