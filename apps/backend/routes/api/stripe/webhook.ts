@@ -52,7 +52,7 @@ export async function post(req: StripeRequest, res: Response) {
     console.error("[STRIPE HOOK] Error processing event", error);
     return res.status(400).json({ error: "Webhook Error" });
   }
-};
+}
 
 async function processEvent(event: Stripe.Event) {
   if (!allowedEvents.includes(event.type)) return;

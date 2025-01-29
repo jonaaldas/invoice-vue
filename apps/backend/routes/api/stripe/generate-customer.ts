@@ -41,6 +41,11 @@ router.post("/", async (req: any, res: Response) => {
           quantity: 1,
         },
       ],
+      subscription_data: {
+        metadata: {
+          userId: user.id,
+        },
+      },
       success_url: `${process.env.CLIENT_URL}/success`,
       cancel_url: `${process.env.CLIENT_URL}/cancel`,
     } as Stripe.Checkout.SessionCreateParams);

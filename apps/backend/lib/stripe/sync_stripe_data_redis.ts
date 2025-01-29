@@ -1,8 +1,11 @@
 import { getStripe } from "./stripe.js";
 import { getRedis } from "../redis/redis.js";
+import { getSupabase } from "../supabase/supabase.js";
+
 import Stripe from "stripe";
 const stripe = getStripe();
 const redis = getRedis();
+const supabase = getSupabase();
 
 export type STRIPE_SUB_CACHE =
   | {
@@ -56,7 +59,7 @@ export async function syncStripeDataToRedis(customerId: string) {
         : null,
   };
 
-  // Store the data in your KV
   await redis.set(`stripe:customer:${customerId}`, subData);
+
   return subData;
 }
