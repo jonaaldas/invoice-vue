@@ -1,21 +1,30 @@
 import express from "express";
-import path from "path";
 import cors from "cors";
-import { fileURLToPath } from "url";
-import { api } from "@invoice/shared";
-import createRouter from "express-file-routing";
 import cookieParser from "cookie-parser";
+import { createRouter } from "express-file-routing";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
+import dotenv from "dotenv";
 import { authenticateToken } from "./middleware/auth.js";
+import { api } from "@invoice/shared";
 import { config } from "dotenv";
-config();
+import { getSupabase } from "./lib/supabase/supabase.js";
 
-const startServer = async () => {
-  const __filename = fileURLToPath(import.meta.url);
-  const __dirname = path.dirname(__filename);
+const supabase = getSupabase();
 
+dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+interface CustomRequest extends express.Request {
+  user?: any;
+}
+
+async function startServer() {
   const app = express();
-  const PORT = process.env.PORT || 4000;
 
+  // Middleware
   app.use(cors());
 
   // Parse raw body for Stripe webhooks
@@ -36,9 +45,29 @@ const startServer = async () => {
       express.json()(req, res, next); // Apply JSON parsing to other routes
     }
   });
-  // Parse JSON bodies for all other routes
-  app.use(express.json());
+
   app.use(cookieParser());
+
+  // Auth middleware
+  app.use(async (req: CustomRequest, res, next) => {
+    const token = req.cookies?.token;
+    if (!token) {
+      return next();
+    }
+
+    try {
+      const {
+        data: { user },
+        error,
+      } = await supabase.auth.getUser(token);
+      if (error) throw error;
+      req.user = user;
+    } catch (error) {
+      console.error("Auth error:", error);
+    }
+
+    next();
+  });
 
   // Apply authentication middleware to API routes except webhook
   app.use("/api", (req, res, next) => {
@@ -48,29 +77,29 @@ const startServer = async () => {
     return authenticateToken(req, res, next);
   });
 
-  // Set up file-based routing
-  await createRouter(app, {
-    directory: path.join(__dirname, "routes"),
-    prefix: "/api",
-  });
-
-  // Determine the correct path to the frontend dist directory
+  // Serve static frontend files
   const frontendDistPath =
     process.env.NODE_ENV === "production"
-      ? path.join(process.cwd(), "../frontend/dist")
-      : path.join(__dirname, "../frontend/dist");
-
-  // Serve static files from the frontend dist directory
+      ? join(process.cwd(), "../frontend/dist")
+      : join(__dirname, "../frontend/dist");
   app.use(express.static(frontendDistPath));
 
-  // Handle SPA routing - return index.html for all non-API routes
+  // API routes using express-file-routing
+  const router = await createRouter({
+    directory: join(__dirname, "routes"),
+    prefix: "/api",
+    options: { caseSensitive: false },
+  });
+  app.use(router);
+
+  // Catch-all route for SPA
   app.get("*", (req, res) => {
     // Skip API routes
     if (req.path.startsWith("/api")) {
       return res.status(404).json({ error: "API route not found" });
     }
 
-    const indexPath = path.join(frontendDistPath, "index.html");
+    const indexPath = join(frontendDistPath, "index.html");
     res.sendFile(indexPath, (err) => {
       if (err) {
         console.error("Error serving index.html:", err);
@@ -79,19 +108,15 @@ const startServer = async () => {
     });
   });
 
-  app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+  const port = process.env.PORT || 4000;
+  app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
     console.log(`Serving static files from: ${frontendDistPath}`);
-    console.log(`Routes directory: ${path.join(__dirname, "routes")}`);
+    console.log(`Routes directory: ${join(__dirname, "routes")}`);
   });
+}
 
-  return app;
-};
-
-// Start the server
 startServer().catch((error) => {
   console.error("Failed to start server:", error);
   process.exit(1);
 });
-
-export default startServer;

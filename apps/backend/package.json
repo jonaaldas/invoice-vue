@@ -4,11 +4,10 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch server.ts",
-    "build": "npx tsc && npm run copy-routes",
+    "build": "npx tsc",
     "start": "node dist/server.js",
     "clean": "rm -rf dist",
-    "prebuild": "npm run clean",
-    "copy-routes": "cp -r routes dist/"
+    "prebuild": "npm run clean"
   },
   "dependencies": {
     "@invoice/shared": "1.0.0",
