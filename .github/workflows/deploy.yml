@@ -1,0 +1,31 @@
+name: Deploy to Render
+
+on:
+  push:
+    branches:
+      - main
+      - staging
+      - development
+
+jobs:
+  deploy:
+    name: Deploy to Render
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Deploy to Render
+        env:
+          deploy_url: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          if [[ "${GITHUB_REF#refs/heads/}" == "main" ]]; then
+            # Production deployment
+            curl "$deploy_url?env=production"
+          elif [[ "${GITHUB_REF#refs/heads/}" == "staging" ]]; then
+            # Staging deployment
+            curl "$deploy_url?env=staging"
+          elif [[ "${GITHUB_REF#refs/heads/}" == "development" ]]; then
+            # Development deployment
+            curl "$deploy_url?env=development"
+          fi
