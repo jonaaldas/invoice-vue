@@ -43,7 +43,23 @@ jobs:
             fi
           fi
 
-          DEPLOY_ID=$(echo $RESPONSE | jq -r '.deploy.id')
-          echo "Deployment triggered with ID: $DEPLOY_ID"
+          # Debug: Print the response
+          echo "Raw response from Render:"
+          echo "$RESPONSE"
+
+          # Check if response is valid JSON
+          if echo "$RESPONSE" | jq empty 2>/dev/null; then
+            DEPLOY_ID=$(echo $RESPONSE | jq -r '.deploy.id')
+            if [[ -n "$DEPLOY_ID" && "$DEPLOY_ID" != "null" ]]; then
+              echo "Deployment triggered with ID: $DEPLOY_ID"
+            else
+              echo "Warning: Deploy ID not found in response"
+            fi
+          else
+            echo "Error: Invalid JSON response from Render"
+            echo "Response was: $RESPONSE"
+            exit 1
+          fi
+
           echo "You can view your application at: $app_url"
           echo "Note: It may take a few minutes for the deployment to complete"
