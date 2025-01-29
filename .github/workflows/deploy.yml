@@ -1,0 +1,65 @@
+name: Deploy to Render
+
+on:
+  push:
+    branches:
+      - main
+      - staging
+      - development
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - main
+      - staging
+      - development
+
+jobs:
+  deploy:
+    name: Deploy to Render
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Deploy to Render
+        env:
+          deploy_url: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+          app_url: ${{ secrets.RENDER_APP_URL }}
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "Deploying PR #${{ github.event.pull_request.number }} to preview environment"
+            RESPONSE=$(curl -s "$deploy_url&env=preview")
+          else
+            # For direct pushes to branches
+            if [[ "${GITHUB_REF#refs/heads/}" == "main" ]]; then
+              echo "Deploying to production environment"
+              RESPONSE=$(curl -s "$deploy_url?env=production")
+            elif [[ "${GITHUB_REF#refs/heads/}" == "staging" ]]; then
+              echo "Deploying to staging environment"
+              RESPONSE=$(curl -s "$deploy_url?env=staging")
+            elif [[ "${GITHUB_REF#refs/heads/}" == "development" ]]; then
+              echo "Deploying to development environment"
+              RESPONSE=$(curl -s "$deploy_url?env=development")
+            fi
+          fi
+
+          # Debug: Print the response
+          echo "Raw response from Render:"
+          echo "$RESPONSE"
+
+          # Check if response is valid JSON
+          if echo "$RESPONSE" | jq empty 2>/dev/null; then
+            DEPLOY_ID=$(echo $RESPONSE | jq -r '.deploy.id')
+            if [[ -n "$DEPLOY_ID" && "$DEPLOY_ID" != "null" ]]; then
+              echo "Deployment triggered with ID: $DEPLOY_ID"
+            else
+              echo "Warning: Deploy ID not found in response"
+            fi
+          else
+            echo "Error: Invalid JSON response from Render"
+            echo "Response was: $RESPONSE"
+            exit 1
+          fi
+
+          echo "You can view your application at: $app_url"
+          echo "Note: It may take a few minutes for the deployment to complete"

@@ -3,43 +3,25 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check } from "lucide-vue-next";
+import axios from "../../lib/axios";
 
-interface Pricing {
-  link: string;
-  priceId: string;
-  price: number;
-  duration: string;
-}
+const loading = ref(false);
 
-const pricing: Pricing[] = [
-  {
-    link: "https://buy.stripe.com/test_28o14Wd0EdQf9nqdQT",
-    priceId: "price_1QXjUjATpO8jfWn5LQv6W0Qv",
-    price: 0,
-    duration: "month",
-  },
-  {
-    link: "https://buy.stripe.com/test_7sI7tk5ych2r0QUdQQ",
-    priceId: "price_1QXWADATpO8jfWn5WXf2sq3V",
-    price: 15,
-    duration: "month",
-  },
-  {
-    link: "https://buy.stripe.com/test_eVa9Bs1hW9zZ2Z28wx",
-    priceId: "price_1QXWAUATpO8jfWn5Xk3JH4ZZ",
-    price: 25,
-    duration: "month",
-  },
-  {
-    link: "https://buy.stripe.com/test_7sI7tk2m0dQf7fi28a",
-    priceId: "price_1QXWBDATpO8jfWn5vc4fIdPD",
-    price: 240,
-    duration: "year",
-  },
-];
-
-const handlePlanSelection = (plan: Pricing) => {
-  //  .. do something
+const handlePlanSelection = async () => {
+  try {
+    loading.value = true;
+    const { data } = await axios.post<{ success: boolean; checkoutUrl: string }>("/api/stripe/generate-customer");
+    if (!data.success) {
+      window.toaster("Error", "There was an error please try again.", "destructive");
+      throw new Error("Failed to generate customer");
+    }
+    window.location.href = data.checkoutUrl;
+  } catch (error) {
+    console.error("Error generating customer:", error);
+    window.toaster("Error", "There was an error please try again", "destructive");
+  } finally {
+    loading.value = false;
+  }
 };
 </script>
 
@@ -50,39 +32,9 @@ const handlePlanSelection = (plan: Pricing) => {
       <h2 class="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight transition-colors first:mt-0">
         Pricing
       </h2>
-      <p class="mt-1 text-muted-foreground">Whatever your status, our offers evolve according to your needs.</p>
     </div>
-    <div class="flex flex-col items-center justify-center sm:grid sm:grid-cols-3 sm:grid-rows-1 gap-4 mt-10">
-      <Card class="w-full sm:h-[90%]">
-        <CardHeader class="text-center pb-2">
-          <CardTitle class="mb-7">Free</CardTitle>
-          <span class="font-bold text-5xl">Free</span>
-        </CardHeader>
-        <CardContent>
-          <ul class="mt-7 space-y-2.5 text-sm">
-            <li class="flex space-x-2">
-              <Check class="flex-shrink-0 mt-0.5 h-4 w-4" />
-              <span class="text-muted-foreground">5 credits</span>
-            </li>
-            <li class="flex space-x-2">
-              <Check class="flex-shrink-0 mt-0.5 h-4 w-4" />
-              <span class="text-muted-foreground">Upload videos</span>
-            </li>
-            <li class="flex space-x-2">
-              <Check class="flex-shrink-0 mt-0.5 h-4 w-4" />
-              <span class="text-muted-foreground">Upload videos</span>
-            </li>
-            <li class="flex space-x-2">
-              <Check class="flex-shrink-0 mt-0.5 h-4 w-4" />
-              <span class="text-muted-foreground">Upload videos</span>
-            </li>
-          </ul>
-        </CardContent>
-        <CardFooter>
-          <Button @click="handlePlanSelection(pricing[0])" class="w-full" variant="outline">Sign up</Button>
-        </CardFooter>
-      </Card>
-      <Card class="border-primary relative w-full">
+    <div class="flex flex-col items-center justify-center sm:grid gap-4 mt-10">
+      <Card class="border-primary relative w-full sm:w-[500px]">
         <span class="absolute -top-12 left-1/2 -translate-x-1/2 animate-bounce hidden sm:block w-full">
           <span class="flex items-center">
             <svg
@@ -97,78 +49,41 @@ const handlePlanSelection = (plan: Pricing) => {
                 fill="currentColor"
                 class="text-muted-foreground" />
             </svg>
-            <Badge class="mt-3 uppercase bg-primary">Save up to 10%</Badge>
+            <Badge class="mt-3 uppercase bg-primary">Eazy</Badge>
           </span>
         </span>
         <CardHeader class="text-center pb-2">
-          <Badge class="uppercase w-max self-center mb-3 bg-primary">Most popular</Badge>
-          <CardTitle class="!mb-7">Content Creator</CardTitle>
+          <Badge class="uppercase w-max self-center mb-3 bg-primary">Cheapest in the market</Badge>
+          <CardTitle class="!mb-7">Yearly subscription</CardTitle>
           <div>
-            <span class="font-bold text-5xl">15</span>
-            <span class="font-thin text-sm">/month</span>
+            <span class="font-bold text-5xl">49.99</span>
+            <span class="font-thin text-sm">/year</span>
           </div>
         </CardHeader>
-        <CardDescription class="text-center w-11/12 mx-auto"> Everything you need to start posting </CardDescription>
+        <CardDescription class="text-center w-11/12 mx-auto">
+          Everything you need to start sending recurring invoices.
+        </CardDescription>
         <CardContent>
           <ul class="mt-7 space-y-2.5 text-sm">
             <li class="flex space-x-2">
               <Check class="flex-shrink-0 mt-0.5 h-4 w-4" />
-              <span class="text-muted-foreground">Everything from free</span>
+              <span class="text-muted-foreground">Create unlimited invoices</span>
             </li>
             <li class="flex space-x-2">
               <Check class="flex-shrink-0 mt-0.5 h-4 w-4" />
-              <span class="text-muted-foreground">50 credits</span>
+              <span class="text-muted-foreground">Create as many clients as you want</span>
             </li>
             <li class="flex space-x-2">
               <Check class="flex-shrink-0 mt-0.5 h-4 w-4" />
-              <span class="text-muted-foreground"
-                >Schedule upload <span class="text-xs bg-slate-300">coming soon</span></span
-              >
-            </li>
-            <li class="flex space-x-2">
-              <Check class="flex-shrink-0 mt-0.5 h-4 w-4" />
-              <span class="text-muted-foreground">Analytics <span class="text-xs bg-slate-300">coming soon</span></span>
+              <span class="text-muted-foreground">Send unlimited emails with recurring invoices </span>
             </li>
           </ul>
         </CardContent>
         <CardFooter>
-          <Button @click="handlePlanSelection(pricing[1])" class="w-full bg-primary hover:bg-primary/90"
-            >Sign up</Button
-          >
-        </CardFooter>
-      </Card>
-      <Card class="w-full sm:h-[90%]">
-        <CardHeader class="text-center pb-2">
-          <CardTitle class="mb-7">Content Creator</CardTitle>
-          <div>
-            <span class="font-bold text-5xl">25</span>
-            <span class="font-thin text-sm">/month</span>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <ul class="mt-7 space-y-2.5 text-sm">
-            <li class="flex space-x-2">
-              <Check class="flex-shrink-0 mt-0.5 h-4 w-4" />
-              <span class="text-muted-foreground">Everything from free</span>
-            </li>
-            <li class="flex space-x-2">
-              <Check class="flex-shrink-0 mt-0.5 h-4 w-4" />
-              <span class="text-muted-foreground">100 credits</span>
-            </li>
-            <li class="flex space-x-2">
-              <Check class="flex-shrink-0 mt-0.5 h-4 w-4" />
-              <span class="text-muted-foreground"
-                >Schedule upload <span class="text-xs bg-slate-300">coming soon</span></span
-              >
-            </li>
-            <li class="flex space-x-2">
-              <Check class="flex-shrink-0 mt-0.5 h-4 w-4" />
-              <span class="text-muted-foreground">Analytics <span class="text-xs bg-slate-300">coming soon</span></span>
-            </li>
-          </ul>
-        </CardContent>
-        <CardFooter>
-          <Button @click="handlePlanSelection(pricing[2])" class="w-full" variant="outline">Sign up</Button>
+          <Button @click="handlePlanSelection()" class="w-full bg-primary hover:bg-primary/90">
+            <Loader :loading="loading" />
+            Pay now
+          </Button>
         </CardFooter>
       </Card>
     </div>

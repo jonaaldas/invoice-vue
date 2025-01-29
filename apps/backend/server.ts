@@ -1,36 +1,116 @@
 import express from "express";
-import path from "path";
+import cors from "cors";
+import cookieParser from "cookie-parser";
 import { fileURLToPath } from "url";
+import { dirname, join } from "path";
+import dotenv from "dotenv";
+import { authenticateToken } from "./middleware/auth.js";
+import { api } from "@invoice/shared";
+import { config } from "dotenv";
+import { getSupabase } from "./lib/supabase/supabase.js";
+import router from './routes/index.js';
+
+const supabase = getSupabase();
+
+dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __dirname = dirname(__filename);
 
-const app = express();
-const PORT = process.env.PORT || 4000;
+interface CustomRequest extends express.Request {
+  user?: any;
+}
 
-// Determine the correct path to the frontend dist directory
-const frontendDistPath =
-  process.env.NODE_ENV === "production"
-    ? path.join(process.cwd(), "../frontend/dist")
-    : path.join(__dirname, "../frontend/dist");
+async function startServer() {
+  const app = express();
 
-// Serve static files from the frontend dist directory
-app.use(express.static(frontendDistPath));
+  // Middleware
+  app.use(cors());
 
-// Handle SPA routing - return index.html for all routes
-app.get("*", (req, res) => {
-  const indexPath = path.join(frontendDistPath, "index.html");
-  res.sendFile(indexPath, (err) => {
-    if (err) {
-      console.error("Error serving index.html:", err);
-      res.status(500).send("Error loading application");
+  // Parse raw body for Stripe webhooks
+  app.use(
+    "/api/stripe/webhook",
+    express.raw({
+      type: (req) => {
+        if (req.headers["content-type"]?.startsWith("application/json")) return "application/json";
+        return false;
+      },
+    })
+  );
+
+  app.use((req, res, next) => {
+    if (req.path === "/stripe/webhook") {
+      next(); // Skip JSON parsing for webhook
+    } else {
+      express.json()(req, res, next); // Apply JSON parsing to other routes
     }
   });
-});
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-  console.log(`Serving static files from: ${frontendDistPath}`);
-});
+  app.use(cookieParser());
 
-export default app;
+  // Auth middleware
+  app.use(async (req: CustomRequest, res, next) => {
+    const token = req.cookies?.token;
+    if (!token) {
+      return next();
+    }
+
+    try {
+      const {
+        data: { user },
+        error,
+      } = await supabase.auth.getUser(token);
+      if (error) throw error;
+      req.user = user;
+    } catch (error) {
+      console.error("Auth error:", error);
+    }
+
+    next();
+  });
+
+  // Apply authentication middleware to API routes except webhook
+  app.use("/api", (req, res, next) => {
+    if (req.path === "/stripe/webhook") {
+      return next();
+    }
+    return authenticateToken(req, res, next);
+  });
+
+  // Serve static frontend files
+  const frontendDistPath =
+    process.env.NODE_ENV === "production"
+      ? join(process.cwd(), "../frontend/dist")
+      : join(__dirname, "../frontend/dist");
+  app.use(express.static(frontendDistPath));
+
+  // Use the router
+  app.use('/api', router);
+
+  // Catch-all route for SPA
+  app.get("*", (req, res) => {
+    // Skip API routes
+    if (req.path.startsWith("/api")) {
+      return res.status(404).json({ error: "API route not found" });
+    }
+
+    const indexPath = join(frontendDistPath, "index.html");
+    res.sendFile(indexPath, (err) => {
+      if (err) {
+        console.error("Error serving index.html:", err);
+        res.status(500).send("Error loading application");
+      }
+    });
+  });
+
+  const port = process.env.PORT || 4000;
+  app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
+    console.log(`Serving static files from: ${frontendDistPath}`);
+  });
+}
+
+startServer().catch((error) => {
+  console.error("Failed to start server:", error);
+  process.exit(1);
+});

@@ -1,6 +1,7 @@
 <template>
   <header class="flex sticky top-0 gap-4 items-center px-4 h-16 border-b bg-background md:px-6">
-    <nav class="hidden flex-col flex-grow gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
+    <nav
+      class="hidden flex-col flex-grow gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
       <a href="/" class="flex gap-2 items-center text-lg font-semibold md:text-base">
         <Package2 class="w-6 h-6" />
         <span>Eazy Invoice</span>
@@ -13,7 +14,7 @@
           v-show="item.name"
           @click="
             () => {
-              $router.push({ path: '/dashboard', query: { tab: item.tab } });
+              emit('update:current-tab', item.tab);
             }
           "
           class="cursor-pointer"
@@ -27,12 +28,14 @@
           </div>
         </span>
       </div>
+      <Button class="hidden md:block ml-auto" @click="logout">Log out</Button>
     </nav>
     <Sheet v-model:open="toggleSheet">
       <Button variant="outline" size="icon" class="shrink-0 md:hidden" @click="toggleSheet = !toggleSheet">
         <Menu class="w-5 h-5" />
         <span class="sr-only">Toggle navigation menu</span>
       </Button>
+      <Button class="block md:hidden ml-auto" @click="logout">Log out</Button>
       <SheetContent side="left">
         <div class="flex flex-col gap-1 justify-between mb-4">
           <SheetTitle>
@@ -50,7 +53,7 @@
             v-show="item.name"
             @click="
               () => {
-                $router.push({ path: '/dashboard', query: { tab: item.tab } });
+                emit('update:current-tab', item.tab);
                 toggleSheet = false;
               }
             "
@@ -71,49 +74,25 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet";
-import { CircleUser, Menu, Package2, Search, Users } from "lucide-vue-next";
+import { supabase } from "@/supabase";
+import { Menu, Package2 } from "lucide-vue-next";
 
 const toggleSheet = ref(false);
+const router = useRouter();
 
-const props = defineProps<{
+defineProps<{
   currentTab?: string;
+  navItems?: any[];
 }>();
 
-const paidNavItems = [
-  {
-    name: "New Invoice",
-    icon: Package2,
-    tab: "invoice",
-  },
-  {
-    name: "Clients",
-    icon: Users,
-    tab: "clients",
-  },
-  {
-    name: "All Invoices",
-    icon: Search,
-    tab: "invoices",
-  },
-  {
-    name: "Billing",
-    icon: Package2,
-    tab: "billing",
-  },
-  {
-    name: "Profile",
-    icon: CircleUser,
-    tab: "profile",
-  },
-  {
-    tab: "client_id",
-  },
-];
+const emit = defineEmits(["update:current-tab"]);
 
-const navItems = computed(() => {
-  return paidNavItems;
-});
+const logout = async () => {
+  const { error } = await supabase.auth.signOut();
+  if (error) throw error;
+
+  router.push("/");
+};
 </script>

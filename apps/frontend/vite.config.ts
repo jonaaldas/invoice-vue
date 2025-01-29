@@ -2,10 +2,10 @@ import path from "path";
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 import VueRouter from "unplugin-vue-router/vite";
-import { VueRouterAutoImports } from 'unplugin-vue-router'
+import { VueRouterAutoImports } from "unplugin-vue-router";
 import tailwind from "tailwindcss";
-import autoprefixer from "autoprefixer"
-import AutoImport from 'unplugin-auto-import/vite';
+import autoprefixer from "autoprefixer";
+import AutoImport from "unplugin-auto-import/vite";
 import * as zod from "zod";
 
 export default defineConfig({
@@ -19,71 +19,64 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          'vue-vendor': ['vue', 'vue-router', '@vue/runtime-core', '@vue/runtime-dom'],
-          'pinia-vendor': ['pinia'],
-          'ui-vendor': ['@headlessui/vue', '@heroicons/vue']
-        }
-      }
+          "vue-vendor": ["vue", "vue-router", "@vue/runtime-core", "@vue/runtime-dom"],
+          "pinia-vendor": ["pinia"],
+          "ui-vendor": ["@headlessui/vue", "@heroicons/vue"],
+        },
+      },
     },
     commonjsOptions: {
-      esmExternals: true
+      esmExternals: true,
     },
-    minify: 'esbuild',
-    target: 'esnext',
+    minify: "esbuild",
+    target: "esnext",
     sourcemap: false,
     cssCodeSplit: true,
     assetsInlineLimit: 4096,
     emptyOutDir: true,
-    reportCompressedSize: false
+    reportCompressedSize: false,
   },
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
+      "@": path.resolve(__dirname, "./src"),
+      "@invoice/shared": path.resolve(__dirname, "../../packages/shared/src/index.ts"),
     },
-    dedupe: ['vue', 'vue-router', 'pinia']
+    dedupe: ["vue", "vue-router", "pinia"],
   },
   optimizeDeps: {
-    include: [
-      'vue',
-      'vue-router',
-      'pinia',
-      '@headlessui/vue',
-      '@heroicons/vue'
-    ],
-    exclude: ['vue-demi']
+    include: ["vue", "vue-router", "pinia", "@headlessui/vue", "@heroicons/vue", "@invoice/shared"],
+    exclude: ["vue-demi"],
   },
   plugins: [
     vue({
       template: {
         compilerOptions: {
-          isCustomElement: (tag) => tag.includes('-')
-        }
-      }
+          isCustomElement: (tag) => tag.includes("-"),
+        },
+      },
     }),
     VueRouter(),
     AutoImport({
-      include: [
-        /\.[tj]sx?$/,
-        /\.vue$/,
-        /\.vue\?vue/,
-        /\.md$/,
-      ],
+      include: [/\.[tj]sx?$/, /\.vue$/, /\.vue\?vue/, /\.md$/],
       imports: [
-        'vue',
+        "vue",
         VueRouterAutoImports,
         {
-          'pinia': [
-            'createPinia',
-            'defineStore',
-            'storeToRefs'
-          ]
-        }
+          pinia: ["createPinia", "defineStore", "storeToRefs", "acceptHMRUpdate", "useAuthStore"],
+        },
       ],
       dts: true,
-      viteOptimizeDeps: true
-    })
+      viteOptimizeDeps: true,
+    }),
   ],
   server: {
     port: 3000,
+    proxy: {
+      "/api": {
+        target: "http://localhost:4000",
+        changeOrigin: true,
+        secure: false,
+      },
+    },
   },
 });

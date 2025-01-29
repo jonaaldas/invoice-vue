@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { ref, computed, defineAsyncComponent, onMounted, watch } from "vue";
 import { useRoute } from "vue-router";
 import NavHeader from "@/components/dashboard/nav-header.vue";
-import { Button } from "@/components/ui/button";
-import { CircleUser, Menu, Package2, Search, Users } from "lucide-vue-next";
+import { CircleUser, Package2, Search, Users } from "lucide-vue-next";
+import { useAuthStore } from "@/stores/auth";
 
 const route = useRoute();
+const authStore = useAuthStore();
 
 type AsyncComponents = {
   invoice: any;
@@ -15,7 +15,7 @@ type AsyncComponents = {
   client_id: any;
 };
 type AsyncComponentKey = keyof AsyncComponents;
-const componentToRender = ref<AsyncComponentKey>("invoice");
+const componentToRender = ref<AsyncComponentKey>(authStore.profile?.is_paid ? "invoice" : "pricing");
 
 const asyncComponents: AsyncComponents = {
   invoice: defineAsyncComponent(() => import("./invoice.vue")),
@@ -73,8 +73,8 @@ const unpaidNavItems = [
 ];
 
 const navItems = computed(() => {
-  // return authStore.profile?.isPaid ? paidNavItems : unpaidNavItems;
-  return true ? paidNavItems : unpaidNavItems;
+  return authStore.profile?.is_paid ? paidNavItems : unpaidNavItems;
+  // return paidNavItems;
 });
 
 // Error handling for Suspense
@@ -82,17 +82,12 @@ const onError = (error: any) => {
   console.error("Error loading component:", error);
 };
 
-watch(
-  () => route.query.tab,
-  (newTab: string) => {
-    console.log("🚀 ~ watch ~ newTab:", newTab);
-    if (!newTab) return;
-    componentToRender.value = newTab as AsyncComponentKey;
-  }
-);
-
 onMounted(() => {
   if (route.query.tab) {
+    if (!authStore.profile?.is_paid) {
+      componentToRender.value = "pricing";
+      return;
+    }
     componentToRender.value = route.query.tab as AsyncComponentKey;
   }
 });
@@ -100,7 +95,10 @@ onMounted(() => {
 
 <template>
   <div class="flex flex-col w-full min-h-screen">
-    <NavHeader :current-tab="componentToRender" :nav-items="navItems" @update:current-tab="(tab) => componentToRender = tab" />
+    <NavHeader
+      :current-tab="componentToRender"
+      :nav-items="navItems"
+      @update:current-tab="(tab: any) => (componentToRender = tab)" />
     <main class="flex flex-col flex-1 gap-4 p-4 md:gap-8 md:p-8">
       <Suspense @error="onError">
         <template #default>
