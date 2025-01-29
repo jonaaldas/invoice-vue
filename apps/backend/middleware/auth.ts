@@ -17,7 +17,6 @@ export const authenticateToken = async (req: CustomRequest, res: Response, next:
 
   const token = authHeader.split(" ")[1];
 
-  // Store the token in the request object for use in route handlers
   req.token = token;
 
   const {

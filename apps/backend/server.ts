@@ -17,11 +17,36 @@ const startServer = async () => {
   const PORT = process.env.PORT || 4000;
 
   app.use(cors());
+
+  // Parse raw body for Stripe webhooks
+  app.use(
+    "/api/stripe/webhook",
+    express.raw({
+      type: (req) => {
+        if (req.headers["content-type"]?.startsWith("application/json")) return "application/json";
+        return false;
+      },
+    })
+  );
+
+  app.use((req, res, next) => {
+    if (req.path === "/stripe/webhook") {
+      next(); // Skip JSON parsing for webhook
+    } else {
+      express.json()(req, res, next); // Apply JSON parsing to other routes
+    }
+  });
+  // Parse JSON bodies for all other routes
   app.use(express.json());
   app.use(cookieParser());
 
-  // Apply authentication middleware to API routes
-  app.use("/api", authenticateToken);
+  // Apply authentication middleware to API routes except webhook
+  app.use("/api", (req, res, next) => {
+    if (req.path === "/stripe/webhook") {
+      return next();
+    }
+    return authenticateToken(req, res, next);
+  });
 
   // Set up file-based routing
   await createRouter(app, {

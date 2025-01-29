@@ -74,6 +74,7 @@ const unpaidNavItems = [
 
 const navItems = computed(() => {
   return authStore.profile?.is_paid ? paidNavItems : unpaidNavItems;
+  // return paidNavItems;
 });
 
 // Error handling for Suspense

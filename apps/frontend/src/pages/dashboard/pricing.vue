@@ -5,8 +5,11 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Check } from "lucide-vue-next";
 import axios from "../../lib/axios";
 
+const loading = ref(false);
+
 const handlePlanSelection = async () => {
   try {
+    loading.value = true;
     const { data } = await axios.post<{ success: boolean; checkoutUrl: string }>("/api/stripe/generate-customer");
     if (!data.success) {
       window.toaster("Error", "There was an error please try again.", "destructive");
@@ -16,6 +19,8 @@ const handlePlanSelection = async () => {
   } catch (error) {
     console.error("Error generating customer:", error);
     window.toaster("Error", "There was an error please try again", "destructive");
+  } finally {
+    loading.value = false;
   }
 };
 </script>
@@ -75,7 +80,10 @@ const handlePlanSelection = async () => {
           </ul>
         </CardContent>
         <CardFooter>
-          <Button @click="handlePlanSelection()" class="w-full bg-primary hover:bg-primary/90">Pay now</Button>
+          <Button @click="handlePlanSelection()" class="w-full bg-primary hover:bg-primary/90">
+            <Loader :loading="loading" />
+            Pay now
+          </Button>
         </CardFooter>
       </Card>
     </div>
