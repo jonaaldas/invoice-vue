@@ -28,12 +28,14 @@
           </div>
         </span>
       </div>
+      <Button class="hidden md:block ml-auto" @click="logout">Log out</Button>
     </nav>
     <Sheet v-model:open="toggleSheet">
       <Button variant="outline" size="icon" class="shrink-0 md:hidden" @click="toggleSheet = !toggleSheet">
         <Menu class="w-5 h-5" />
         <span class="sr-only">Toggle navigation menu</span>
       </Button>
+      <Button class="block md:hidden ml-auto" @click="logout">Log out</Button>
       <SheetContent side="left">
         <div class="flex flex-col gap-1 justify-between mb-4">
           <SheetTitle>
@@ -74,14 +76,23 @@
 <script setup lang="ts">
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet";
-import { CircleUser, Menu, Package2, Search, Users } from "lucide-vue-next";
+import { supabase } from "@/supabase";
+import { Menu, Package2 } from "lucide-vue-next";
 
 const toggleSheet = ref(false);
+const router = useRouter();
 
-const props = defineProps<{
+defineProps<{
   currentTab?: string;
   navItems?: any[];
 }>();
 
 const emit = defineEmits(["update:current-tab"]);
+
+const logout = async () => {
+  const { error } = await supabase.auth.signOut();
+  if (error) throw error;
+
+  router.push("/");
+};
 </script>

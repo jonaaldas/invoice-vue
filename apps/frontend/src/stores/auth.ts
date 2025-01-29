@@ -42,7 +42,7 @@ export const useAuthStore = defineStore("auth-store", () => {
     if (isTrackingAuthChanges.value) return;
 
     isTrackingAuthChanges.value = true;
-    supabase.auth.onAuthStateChange((event, session) => {
+    supabase.auth.onAuthStateChange((_, session) => {
       setTimeout(async () => {
         await setAuth(session);
       }, 0);
