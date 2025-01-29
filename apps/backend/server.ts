@@ -88,7 +88,13 @@ async function startServer() {
   const router = await createRouter({
     directory: join(__dirname, "routes"),
     prefix: "/api",
-    options: { caseSensitive: false },
+    options: { 
+      caseSensitive: false,
+      typescript: {
+        enabled: false // Disable TypeScript loading since we're using compiled JS
+      },
+      extension: ".js" // Force .js extension for route files
+    }
   });
   app.use(router);
 

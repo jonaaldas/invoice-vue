@@ -3,15 +3,17 @@ import { User } from "../../../lib/supabase/supabase.js";
 import { getStripe } from "../../../lib/stripe/stripe.js";
 import { getRedis } from "../../../lib/redis/redis.js";
 import Stripe from "stripe";
+
 const stripe = getStripe();
 const redis = getRedis();
+
 // Define custom interface extending Express Request
 interface CustomRequest extends Request {
   token?: string;
   user: User;
 }
 
-export const post = async (req: CustomRequest, res: Response) => {
+export async function post(req: CustomRequest, res: Response) {
   try {
     const user = req.user;
     // const userData = {

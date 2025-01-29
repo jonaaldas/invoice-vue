@@ -4,12 +4,12 @@ import { getRedis } from "../../../lib/redis/redis.js";
 import { Request, Response } from "express";
 
 const redis = getRedis();
+
 interface CustomRequest extends Request {
-  token?: string;
   user: User;
 }
 
-export const get = async (req: CustomRequest, res: Response) => {
+export async function get(req: CustomRequest, res: Response) {
   const user = req.user;
   const stripeCustomerId = (await redis.get(`stripe:user:${user.id}`)) as string;
   if (!stripeCustomerId) {
@@ -20,4 +20,4 @@ export const get = async (req: CustomRequest, res: Response) => {
   await syncStripeDataToRedis(stripeCustomerId);
   console.log("success");
   return res.json({ success: true });
-};
+}

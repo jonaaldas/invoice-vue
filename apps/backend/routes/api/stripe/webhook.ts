@@ -2,6 +2,7 @@ import { getStripe } from "../../../lib/stripe/stripe.js";
 import { Request, Response } from "express";
 import Stripe from "stripe";
 import { syncStripeDataToRedis } from "../../../lib/stripe/sync_stripe_data_redis.js";
+
 // Extend the Express Request type to include rawBody
 interface StripeRequest extends Request {
   rawBody?: Buffer;
@@ -28,10 +29,10 @@ const allowedEvents: Stripe.Event.Type[] = [
   "payment_intent.canceled",
 ];
 
-let stripe = getStripe();
+const stripe = getStripe();
 let endpointSecret = process.env.STRIPE_WEBHOOK_KEY;
 
-export const post = async (req: StripeRequest, res: Response) => {
+export async function post(req: StripeRequest, res: Response) {
   const signature = req.headers["stripe-signature"];
   if (!endpointSecret || !req.body || !signature) {
     console.log("Here");
