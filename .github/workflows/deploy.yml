@@ -28,7 +28,7 @@ jobs:
         run: |
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
             echo "Deploying PR #${{ github.event.pull_request.number }} to preview environment"
-            RESPONSE=$(curl -s "$deploy_url?env=preview")
+            RESPONSE=$(curl -s "$deploy_url&env=preview")
           else
             # For direct pushes to branches
             if [[ "${GITHUB_REF#refs/heads/}" == "main" ]]; then
