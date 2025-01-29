@@ -1,6 +1,6 @@
-import { syncStripeDataToRedis } from "../../../lib/stripe/sync_stripe_data_redis";
-import { User } from "../../../lib/supabase/supabase";
-import { getRedis } from "../../../lib/redis/redis";
+import { syncStripeDataToRedis } from "../../../lib/stripe/sync_stripe_data_redis.js";
+import { User } from "../../../lib/supabase/supabase.js";
+import { getRedis } from "../../../lib/redis/redis.js";
 import { Request, Response } from "express";
 
 const redis = getRedis();

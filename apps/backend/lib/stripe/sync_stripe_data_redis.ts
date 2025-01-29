@@ -1,5 +1,5 @@
-import { getStripe } from "./stripe";
-import { getRedis } from "../redis/redis";
+import { getStripe } from "./stripe.js";
+import { getRedis } from "../redis/redis.js";
 import Stripe from "stripe";
 const stripe = getStripe();
 const redis = getRedis();

@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import { User } from "../../../lib/supabase/supabase";
-import { getStripe } from "../../../lib/stripe/stripe";
-import { getRedis } from "../../../lib/redis/redis";
+import { User } from "../../../lib/supabase/supabase.js";
+import { getStripe } from "../../../lib/stripe/stripe.js";
+import { getRedis } from "../../../lib/redis/redis.js";
 import Stripe from "stripe";
 const stripe = getStripe();
 const redis = getRedis();

@@ -1,7 +1,7 @@
-import { getStripe } from "../../../lib/stripe/stripe";
+import { getStripe } from "../../../lib/stripe/stripe.js";
 import { Request, Response } from "express";
 import Stripe from "stripe";
-import { syncStripeDataToRedis } from "../../../lib/stripe/sync_stripe_data_redis";
+import { syncStripeDataToRedis } from "../../../lib/stripe/sync_stripe_data_redis.js";
 // Extend the Express Request type to include rawBody
 interface StripeRequest extends Request {
   rawBody?: Buffer;
