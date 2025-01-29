@@ -6,6 +6,12 @@ on:
       - main
       - staging
       - development
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - main
+      - staging
+      - development
 
 jobs:
   deploy:
@@ -19,13 +25,19 @@ jobs:
         env:
           deploy_url: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
         run: |
-          if [[ "${GITHUB_REF#refs/heads/}" == "main" ]]; then
-            # Production deployment
-            curl "$deploy_url?env=production"
-          elif [[ "${GITHUB_REF#refs/heads/}" == "staging" ]]; then
-            # Staging deployment
-            curl "$deploy_url?env=staging"
-          elif [[ "${GITHUB_REF#refs/heads/}" == "development" ]]; then
-            # Development deployment
-            curl "$deploy_url?env=development"
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            # For pull requests, deploy to preview environment
+            curl "$deploy_url?env=preview"
+          else
+            # For direct pushes to branches
+            if [[ "${GITHUB_REF#refs/heads/}" == "main" ]]; then
+              # Production deployment
+              curl "$deploy_url?env=production"
+            elif [[ "${GITHUB_REF#refs/heads/}" == "staging" ]]; then
+              # Staging deployment
+              curl "$deploy_url?env=staging"
+            elif [[ "${GITHUB_REF#refs/heads/}" == "development" ]]; then
+              # Development deployment
+              curl "$deploy_url?env=development"
+            fi
           fi
