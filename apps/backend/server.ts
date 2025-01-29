@@ -1,7 +1,6 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import { createRouter } from "express-file-routing";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 import dotenv from "dotenv";
@@ -9,6 +8,7 @@ import { authenticateToken } from "./middleware/auth.js";
 import { api } from "@invoice/shared";
 import { config } from "dotenv";
 import { getSupabase } from "./lib/supabase/supabase.js";
+import router from './routes/index.js';
 
 const supabase = getSupabase();
 
@@ -84,19 +84,8 @@ async function startServer() {
       : join(__dirname, "../frontend/dist");
   app.use(express.static(frontendDistPath));
 
-  // API routes using express-file-routing
-  const router = await createRouter({
-    directory: join(__dirname, "routes"),
-    prefix: "/api",
-    options: { 
-      caseSensitive: false,
-      typescript: {
-        enabled: false // Disable TypeScript loading since we're using compiled JS
-      },
-      extension: ".js" // Force .js extension for route files
-    }
-  });
-  app.use(router);
+  // Use the router
+  app.use('/api', router);
 
   // Catch-all route for SPA
   app.get("*", (req, res) => {
@@ -118,7 +107,6 @@ async function startServer() {
   app.listen(port, () => {
     console.log(`Server running on port ${port}`);
     console.log(`Serving static files from: ${frontendDistPath}`);
-    console.log(`Routes directory: ${join(__dirname, "routes")}`);
   });
 }
 

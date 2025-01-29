@@ -9,7 +9,7 @@ interface CustomRequest extends Request {
   user: User;
 }
 
-export async function get(req: CustomRequest, res: Response) {
+export async function get(req: any, res: Response) {
   const user = req.user;
   const stripeCustomerId = (await redis.get(`stripe:user:${user.id}`)) as string;
   if (!stripeCustomerId) {

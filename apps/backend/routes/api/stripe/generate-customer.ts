@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Request, Response, Router } from "express";
 import { User } from "../../../lib/supabase/supabase.js";
 import { getStripe } from "../../../lib/stripe/stripe.js";
 import { getRedis } from "../../../lib/redis/redis.js";
@@ -6,6 +6,7 @@ import Stripe from "stripe";
 
 const stripe = getStripe();
 const redis = getRedis();
+const router = Router();
 
 // Define custom interface extending Express Request
 interface CustomRequest extends Request {
@@ -13,15 +14,12 @@ interface CustomRequest extends Request {
   user: User;
 }
 
-export async function post(req: CustomRequest, res: Response) {
+// Method 1: Using Router
+router.post("/", async (req: any, res: Response) => {
   try {
     const user = req.user;
-    // const userData = {
-    //   name: `${user.user_metadata.first_name} ${user.user_metadata.last_name}`,
-    //   email: user.email,
-    // };
-
     let stripeCustomerId = await redis.get(`stripe:user:${user.id}`);
+
     if (!stripeCustomerId) {
       const newCustomer = await stripe.customers.create({
         email: user.email,
@@ -33,6 +31,7 @@ export async function post(req: CustomRequest, res: Response) {
       await redis.set(`stripe:user:${user.id}`, newCustomer.id);
       stripeCustomerId = newCustomer.id;
     }
+
     const checkout = await stripe.checkout.sessions.create({
       customer: stripeCustomerId as string,
       mode: "subscription",
@@ -51,4 +50,6 @@ export async function post(req: CustomRequest, res: Response) {
     console.error("Error generating customer:", error);
     return res.status(500).json({ error: "Failed to generate customer" });
   }
-};
+});
+
+export default router;
