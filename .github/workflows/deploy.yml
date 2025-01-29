@@ -24,20 +24,26 @@ jobs:
       - name: Deploy to Render
         env:
           deploy_url: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+          app_url: ${{ secrets.RENDER_APP_URL }}
         run: |
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            # For pull requests, deploy to preview environment
-            curl "$deploy_url?env=preview"
+            echo "Deploying PR #${{ github.event.pull_request.number }} to preview environment"
+            RESPONSE=$(curl -s "$deploy_url?env=preview")
           else
             # For direct pushes to branches
             if [[ "${GITHUB_REF#refs/heads/}" == "main" ]]; then
-              # Production deployment
-              curl "$deploy_url?env=production"
+              echo "Deploying to production environment"
+              RESPONSE=$(curl -s "$deploy_url?env=production")
             elif [[ "${GITHUB_REF#refs/heads/}" == "staging" ]]; then
-              # Staging deployment
-              curl "$deploy_url?env=staging"
+              echo "Deploying to staging environment"
+              RESPONSE=$(curl -s "$deploy_url?env=staging")
             elif [[ "${GITHUB_REF#refs/heads/}" == "development" ]]; then
-              # Development deployment
-              curl "$deploy_url?env=development"
+              echo "Deploying to development environment"
+              RESPONSE=$(curl -s "$deploy_url?env=development")
             fi
           fi
+
+          DEPLOY_ID=$(echo $RESPONSE | jq -r '.deploy.id')
+          echo "Deployment triggered with ID: $DEPLOY_ID"
+          echo "You can view your application at: $app_url"
+          echo "Note: It may take a few minutes for the deployment to complete"
