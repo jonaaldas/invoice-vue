@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check } from "lucide-vue-next";
 import axios from "../../lib/axios";
-
+import { Loader2 } from "lucide-vue-next";
 const loading = ref(false);
 
 const handlePlanSelection = async () => {
@@ -80,8 +80,8 @@ const handlePlanSelection = async () => {
           </ul>
         </CardContent>
         <CardFooter>
-          <Button @click="handlePlanSelection()" class="w-full bg-primary hover:bg-primary/90">
-            <Loader :loading="loading" />
+          <Button @click="handlePlanSelection()" class="w-full bg-primary hover:bg-primary/90" :disabled="loading">
+            <Loader2 v-if="loading"  class="w-4 h-4 mr-2 animate-spin" />
             Pay now
           </Button>
         </CardFooter>

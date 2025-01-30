@@ -3,14 +3,12 @@
     <Card class="w-full max-w-md">
       <CardHeader>
         <div class="flex justify-center mb-4">
-          <Loader2 v-if="isLoading" class="w-16 h-16 text-primary animate-spin" />
-          <CheckCircle v-else-if="isSuccess" class="w-16 h-16 text-green-500" />
-          <XCircle v-else class="w-16 h-16 text-red-500" />
+          <component :is="statusContent.icon" :class="statusContent.iconClass" />
         </div>
-        <CardTitle class="text-2xl text-center">{{ title }}</CardTitle>
-        <CardDescription class="text-center">{{ description }}</CardDescription>
+        <CardTitle class="text-2xl text-center">{{ statusContent.title }}</CardTitle>
+        <CardDescription class="text-center">{{ statusContent.description }}</CardDescription>
       </CardHeader>
-      <CardContent v-if="!isLoading && isSuccess" class="flex justify-center">
+      <CardContent v-if="status === 'success'" class="flex justify-center">
         <Button @click="goToDashboard" class="w-full max-w-xs bg-primary hover:bg-primary/90"> Go to Dashboard </Button>
       </CardContent>
     </Card>
@@ -23,38 +21,63 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useRouter } from "vue-router";
 import { CheckCircle, XCircle, Loader2 } from "lucide-vue-next";
 import axios from "../lib/axios";
-
+import { supabase } from "../supabase/index";
 const router = useRouter();
-const isLoading = ref(true);
-const isSuccess = ref(false);
+const status = ref("loading"); // loading, success, error
 
-const title = computed(() => (isSuccess.value ? "Payment Successful!" : "Payment Failed"));
-const description = computed(() => (isSuccess.value ? "Thank you for your purchase" : "There was an error processing your payment"));
+const statusContent = computed(() => {
+  switch (status.value) {
+    case "loading":
+      return {
+        icon: Loader2,
+        iconClass: "w-16 h-16 text-primary animate-spin",
+        title: "Processing Payment...",
+        description: "Please wait while we confirm your payment",
+      };
+    case "success":
+      return {
+        icon: CheckCircle,
+        iconClass: "w-16 h-16 text-green-500",
+        title: "Payment Successful!",
+        description: "Thank you for your purchase",
+      };
+    case "error":
+      return {
+        icon: XCircle,
+        iconClass: "w-16 h-16 text-red-500",
+        title: "Payment Failed",
+        description: "There was an error processing your payment",
+      };
+    default:
+      return {
+        icon: Loader2,
+        iconClass: "w-16 h-16 text-primary animate-spin",
+        title: "Processing Payment...",
+        description: "Please wait while we confirm your payment",
+      };
+  }
+});
 
 const goToDashboard = () => {
-  router.push("/dashboard");
+  window.location.href = "/dashboard";
 };
 
 onMounted(async () => {
   try {
     await axios.get("/api/stripe/success");
-    isSuccess.value = true;
-    // Redirect to dashboard after showing success message briefly
+    status.value = "success";
     setTimeout(() => {
-      router.push("/dashboard");
+      // here we need to update the session
+
+      supabase.auth.getSession().then(() => {
+        window.location.href = "/dashboard";
+      });
     }, 1500);
   } catch (error) {
-    isSuccess.value = false;
-    // Redirect to dashboard after showing error briefly
+    status.value = "error";
     setTimeout(() => {
-      router.push("/dashboard");
+      window.location.href = "/dashboard";
     }, 1500);
-  } finally {
-    isLoading.value = false;
   }
 });
 </script>
-
-<style scoped>
-/* Add any scoped styles here if needed */
-</style>

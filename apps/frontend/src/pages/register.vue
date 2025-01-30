@@ -36,7 +36,7 @@ const onSubmit = form.handleSubmit(async (values) => {
     window.toaster("Error", "Something went wrong");
     return;
   }
-  window.toaster("Success", "Account created successfully");
+  window.toaster("Success", "Account created successfully. Check your email for a verification link");
   router.push("/login");
 });
 </script>
